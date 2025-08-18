@@ -75,7 +75,7 @@ _G.Hat3Offset = CFrame.new(0,0,0)
 
 
 workspace.Gravity = 0
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/NitrousVR/main/rean"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/NitrousVR/refs/heads/main/rean22"))()
 wait(.05)
 
        local c = game.Players.LocalPlayer.Character

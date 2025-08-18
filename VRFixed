@@ -59,7 +59,7 @@ _G.CH = {
     }
 }
 _G.HeadScale = 3
-_G.HeadHat = "Accessory (BiggestHeadWhite)"
+_G.HeadHat = "MediHood"
 _G.NitrousHats = true -- enables hats
 _G.Hat1 = "HatName"
 _G.Hat2 = "HatName"

@@ -151,6 +151,22 @@ local handR =c["Right Arm"]
 local head = c[_G.HeadHat]
 local R1down = false
 
+for i,v in pairs(char.Humanoid:GetAccessories()) do
+    if v:FindFirstChild("Handle") then
+        local handle = v.Handle
+        
+        if v.Name == options.righthandhat and not handR then
+            handle:FindFirstChildOfClass("SpecialMesh"):Destroy()
+            handR = v
+        elseif v.Name == options.lefthandhat and not handL then
+            handle:FindFirstChildOfClass("SpecialMesh"):Destroy()
+            handL = v
+        elseif v.Name == options.headhat and not head then
+            handle.Transparency = 1
+            head = v
+        end
+    end
+end
 
 
 char.Humanoid.AnimationPlayed:connect(function(anim)

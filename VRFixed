@@ -1,5 +1,5 @@
 print([[ 
-+                                                                                                                                                           
+                                                                                                                                                           
          ,--.                                                                                                                                .--,-``-.     
        ,--.'|               ___                                                                           ,-.----.                          /   /     '.   
    ,--,:  : |   ,--,      ,--.'|_                                                                   ,---. \    /  \                  ,---. / ../        ;  
@@ -25,9 +25,7 @@ print([[
                                                                                                      
                                                                                                      
 ]])
-if _G.HeadRotation == nil then 
-_G.HeadRotation = CFrame.Angles(0,0,0)
-end
+_G.HatCollide = false
 _G.CustomHats = true -- Enable or disable custom rig feature (basically old oxide when false)
 _G.CH = {
     Torso = {
@@ -60,8 +58,9 @@ _G.CH = {
         Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(90))
     }
 }
-_G.HatCollide = false
-_G.NitrousHats = false -- enables hats
+_G.HeadScale = 3
+_G.HeadHat = "Accessory (BiggestHeadWhite)"
+_G.NitrousHats = true -- enables hats
 _G.Hat1 = "HatName"
 _G.Hat2 = "HatName"
 _G.Hat3 = "HatName"
@@ -75,7 +74,7 @@ _G.Hat3Offset = CFrame.new(0,0,0)
 
 
 workspace.Gravity = 0
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/NitrousVR/main/rean"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Nitro-GT/NitrousVR/main/rean22"))()
 wait(.05)
 
        local c = game.Players.LocalPlayer.Character
@@ -103,7 +102,7 @@ end)
 local options = {}
 
 -- OPTIONS:
-options.delbody = false
+options.delbody = true
 options.headscale = _G.HeadScale -- how big you are in vr, 1 is default, 3 is recommended for max comfort in vr
 options.forcebubblechat = true -- decide if to force bubblechat so you can see peoples messages
 
@@ -198,7 +197,7 @@ local function Align2(Part1, Part0, Position, Angle)
     end
 
 
-Align2(head.Handle,moveHead,CFrame.new(0,0,0), _G.HeadRotation)
+Align2(head.Handle,moveHead,CFrame.new(0,0,0),  CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
 Align(handR,moveHandR,CFrame.new(0,0,0),CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
 Align(handL,moveHandL,CFrame.new(0,0,0), CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
 if _G.NitrousHats == true then
@@ -212,16 +211,24 @@ pcall(function()
 Align2(c[_G.Hat3].Handle,moveHead,_G.Hat3Offset, CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
 end)
 end
-
+input.InputChanged:connect(function(key)
+	if key.KeyCode == Enum.KeyCode.ButtonR1 then
+		if key.Position.Z > 0.9 then
+			R1down = true
+		else
+			R1down = false
+		end
+	end
+end)
 
 input.InputBegan:connect(function(key)
-	if key.KeyCode == Enum.KeyCode.ButtonR1 or key.KeyCode == Enum.KeyCode.ButtonA then
+	if key.KeyCode == Enum.KeyCode.ButtonR1 then
 		R1down = true
 	end
 end)
 
 input.InputEnded:connect(function(key)
-	if key.KeyCode == Enum.KeyCode.ButtonR1 or key.KeyCode == Enum.KeyCode.ButtonA then
+	if key.KeyCode == Enum.KeyCode.ButtonR1 then
 		R1down = false
 	end
 end)

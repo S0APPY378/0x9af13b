@@ -65,7 +65,7 @@ _G.Hat1 = "HatName"
 _G.Hat2 = "HatName"
 _G.Hat3 = "HatName"
 -- Get the offsets in studio by putting your head hat handle and the other hat's handle at 0,0,0
--- and then move the offsetted hat until it looks normal and copy the position
+-- and then move the offsetted hat until it looks normal and copy the position.
 _G.Hat1Offset = CFrame.new(0,0.55,-0.1) 
 _G.Hat2Offset = CFrame.new(0,-2,0) 
 _G.Hat3Offset = CFrame.new(0,0,0)

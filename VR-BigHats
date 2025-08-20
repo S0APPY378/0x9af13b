@@ -38,13 +38,13 @@ _G.CH = {
     LeftArm = {
         Name= "Accessory (LArm)",
         TextureId = "103757531289975", 
-        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(0))
+        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(90))
     },
 
     RightArm = {
         Name= "Accessory (RArm)",
         TextureId = "103757531289975", 
-        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(0))
+        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(90))
     },
 
     LeftLeg = {
@@ -59,7 +59,7 @@ _G.CH = {
         Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(90))
     }
 }
-_G.HeadScale = 3
+_G.HeadScale = 8
 _G.HeadHat = "Accessory (big head)"
 _G.NitrousHats = true -- enables hats
 _G.Hat1 = "HatName"
@@ -75,7 +75,7 @@ _G.Hat3Offset = CFrame.new(0,0,0)
 
 
 workspace.Gravity = 0
-loadstring(game:HttpGet("https://raw.githubusercontent.com/S0APPY378/custom-vr/main/Reanim"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/Reanim2"))()
 wait(.05)
 
        local c = game.Players.LocalPlayer.Character

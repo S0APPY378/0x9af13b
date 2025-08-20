@@ -1,6 +1,6 @@
-## CUSTOM VR SCRIPT
+# CUSTOM VR SCRIPT
 
-# Uses Nitrous VR and permadeath method
+### (Uses Nitrous VR and permadeath method)
 
 
-(NitrousVR/Oxide Archived)
+- (NitrousVR/Oxide Archived)

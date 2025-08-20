@@ -1,0 +1,245 @@
+print([[ 
+                                                                                                                                                           
+         ,--.                                                                                                                                .--,-``-.     
+       ,--.'|               ___                                                                           ,-.----.                          /   /     '.   
+   ,--,:  : |   ,--,      ,--.'|_                                                                   ,---. \    /  \                  ,---. / ../        ;  
+,`--.'`|  ' : ,--.'|      |  | :,'    __  ,-.    ,---.            ,--,                             /__./| ;   :    \                /__./| \ ``\  .`-    ' 
+|   :  :  | | |  |,       :  : ' :  ,' ,'/ /|   '   ,'\         ,'_ /|    .--.--.             ,---.;  ; | |   | .\ :           ,---.;  ; |  \___\/   \   : 
+:   |   \ | : `--'_     .;__,'  /   '  | |' |  /   /   |   .--. |  | :   /  /    '           /___/ \  | | .   : |: |          /___/ \  | |       \   :   | 
+|   : '  '; | ,' ,'|    |  |   |    |  |   ,' .   ; ,. : ,'_ /| :  . |  |  :  /`./           \   ;  \ ' | |   |  \ :          \   ;  \ ' |       /  /   /  
+'   ' ;.    ; '  | |    :__,'| :    '  :  /   '   | |: : |  ' | |  . .  |  :  ;_              \   \  \: | |   : .  /           \   \  \: |       \  \   \  
+|   | | \   | |  | :      '  : |__  |  | '    '   | .; : |  | ' |  | |   \  \    `.            ;   \  ' . ;   | |  \            ;   \  ' .   ___ /   :   | 
+'   : |  ; .' '  : |__    |  | '.'| ;  : |    |   :    | :  | : ;  ; |    `----.   \            \   \   ' |   | ;\  \            \   \   '  /   /\   /   : 
+|   | '`--'   |  | '.'|   ;  :    ; |  , ;     \   \  /  '  :  `--'   \  /  /`--'  /             \   `  ; :   ' | \.'             \   `  ; / ,,/  ',-    . 
+'   : |       ;  :    ;   |  ,   /   ---'       `----'   :  ,      .-./ '--'.     /               :   \ | :   : :-'                :   \ | \ ''\        ;  
+;   |.'       |  ,   /     ---`-'                         `--`----'       `--'---'                 '---"  |   |.'                   '---"   \   \     .'   
+'---'          ---`-'                                                                                     `---'                              `--`-,,-'     
+                                                                                                                                                           
+
+			                        _ _   _                 _     _ _           _ _        _   _                 
+			                       (_) | | |               | |   | (_)         (_) |      | | (_)                
+			 __   ___ __  __      ___| |_| |__   ___  _   _| |_  | |_ _ __ ___  _| |_ __ _| |_ _  ___  _ __  ___ 
+			 \ \ / / '__| \ \ /\ / / | __| '_ \ / _ \| | | | __| | | | '_ ` _ \| | __/ _` | __| |/ _ \| '_ \/ __|
+			  \ V /| |     \ V  V /| | |_| | | | (_) | |_| | |_  | | | | | | | | | || (_| | |_| | (_) | | | \__ \
+			   \_/ |_|      \_/\_/ |_|\__|_| |_|\___/ \__,_|\__| |_|_|_| |_| |_|_|\__\__,_|\__|_|\___/|_| |_|___/
+                                                                                                     
+                                                                                                     
+]])
+
+_G.HatCollide = false
+_G.CustomHats = true -- Enable or disable custom rig feature (basically old oxide when false)
+_G.CH = {
+    Torso = {
+        Name= "burger",
+        TextureId = "87928159560963",
+        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(0))
+    },
+
+    LeftArm = {
+        Name= "Accessory (LArm)",
+        TextureId = "103757531289975", 
+        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(0))
+    },
+
+    RightArm = {
+        Name= "Accessory (RArm)",
+        TextureId = "103757531289975", 
+        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(0))
+    },
+
+    LeftLeg = {
+        Name= "Accessory",
+        TextureId = "17374768001", 
+        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(90))
+    },
+
+    RightLeg = {
+        Name= "Accessory2",
+        TextureId = "17374768001", 
+        Orientation= CFrame.Angles(math.rad(0),math.rad(0),math.rad(90))
+    }
+}
+_G.HeadScale = 3
+_G.HeadHat = "Accessory (big head)"
+_G.NitrousHats = true -- enables hats
+_G.Hat1 = "HatName"
+_G.Hat2 = "HatName"
+_G.Hat3 = "HatName"
+-- Get the offsets in studio by putting your head hat handle and the other hat's handle at 0,0,0
+-- and then move the offsetted hat until it looks normal and copy the position.
+_G.Hat1Offset = CFrame.new(0,0.55,-0.1) 
+_G.Hat2Offset = CFrame.new(0,-2,0) 
+_G.Hat3Offset = CFrame.new(0,0,0)
+
+
+
+
+workspace.Gravity = 0
+loadstring(game:HttpGet("https://raw.githubusercontent.com/S0APPY378/custom-vr/main/Reanim"))()
+wait(.05)
+
+       local c = game.Players.LocalPlayer.Character
+       local char = c
+local prt=Instance.new("Model", workspace)
+local z1 =  Instance.new("Part", prt)
+z1.Name="Torso"
+z1.CanCollide = false
+z1.Anchored = true
+local z2  =Instance.new("Part", prt)
+z2.Name="Head"
+z2.Anchored = true
+z2.CanCollide = false
+local z3 =Instance.new("Humanoid", prt)
+z3.Name="Humanoid"
+z1.Position = Vector3.new(0,9999,0)
+z2.Position = Vector3.new(0,9991,0)
+ game.Players.LocalPlayer.Character=c
+ pcall(function()
+c.Torso.Neck:Destroy()
+end)
+
+
+
+local options = {}
+
+-- OPTIONS:
+options.delbody = true
+options.headscale = _G.HeadScale -- how big you are in vr, 1 is default, 3 is recommended for max comfort in vr
+options.forcebubblechat = true -- decide if to force bubblechat so you can see peoples messages
+
+options.headhat = _G.HeadHat --name of the accessory which you are using as a head
+options.righthandhat = "brick arm" -- name of the accessory which you are using as your right hand
+options.lefthandhat = "Unloaded head" -- name of the accessory which you are using as your left hand
+
+options.righthandrotoffset = Vector3.new(90,0,0)
+options.lefthandrotoffset = Vector3.new(90,0,0)
+
+--
+
+--local backpack = plr.Backpack
+
+local VR = game:GetService("VRService")
+local input = game:GetService("UserInputService")
+
+local cam = workspace.CurrentCamera
+
+cam.CameraType = "Scriptable"
+
+cam.HeadScale = options.headscale
+
+game:GetService("StarterGui"):SetCore("VRLaserPointerMode", 0)
+game:GetService("StarterGui"):SetCore("VREnableControllerModels", true)
+
+
+local function createpart(size, name)
+	local Part = Instance.new("Part", char)
+	Part.CFrame = char.HumanoidRootPart.CFrame
+	Part.Size = size
+	Part.Transparency = 1
+	Part.CanCollide = false
+	Part.Anchored = true
+	Part.Name = name
+	return Part
+end
+
+local moveHandL = createpart(Vector3.new(1,1,2), "moveRH")
+local moveHandR = createpart(Vector3.new(1,1,2), "moveLH")
+local moveHead = createpart(Vector3.new(1,1,1), "moveH")
+
+local handL = c["Left Arm"]
+local handR =c["Right Arm"]
+local head = c[_G.HeadHat]
+local R1down = false
+
+
+
+char.Humanoid.AnimationPlayed:connect(function(anim)
+	anim:Stop()
+end)
+
+for i,v in pairs(char.Humanoid:GetPlayingAnimationTracks()) do
+	v:AdjustSpeed(0)
+end
+
+local torso = char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso")
+torso.Anchored = true
+char.HumanoidRootPart.Anchored = true
+
+workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position)
+
+input.UserCFrameChanged:connect(function(part,move)
+	if part == Enum.UserCFrame.Head then
+		--move(head,cam.CFrame*move)
+		moveHead.CFrame = cam.CFrame*(CFrame.new(move.p*(cam.HeadScale-1))*move)
+	elseif part == Enum.UserCFrame.LeftHand then
+		--move(handL,cam.CFrame*move)
+		moveHandL.CFrame = cam.CFrame*(CFrame.new(move.p*(cam.HeadScale-1))*move*CFrame.Angles(math.rad(options.righthandrotoffset.X),math.rad(options.righthandrotoffset.Y),math.rad(options.righthandrotoffset.Z)))
+	elseif part == Enum.UserCFrame.RightHand then
+		--move(handR,cam.CFrame*move)
+		moveHandR.CFrame = cam.CFrame*(CFrame.new(move.p*(cam.HeadScale-1))*move*CFrame.Angles(math.rad(options.righthandrotoffset.X),math.rad(options.righthandrotoffset.Y),math.rad(options.righthandrotoffset.Z)))
+	end
+end)
+
+local function Align(Part1, Part0, Position, Angle)
+
+    game:GetService("RunService").Heartbeat:Connect(function(set)
+        Part1.CFrame = Part0.CFrame * Position * Angle 
+     cam.CameraType = "Scriptable"
+    cam.HeadScale = options.headscale
+Part1.CanCollide = false
+    end)
+end
+local function Align2(Part1, Part0, Position, Angle)
+
+    game:GetService("RunService").Heartbeat:Connect(function(set)
+        Part1.CFrame = Part0.CFrame * Position * Angle 
+     Part1:BreakJoints()
+    end)
+    end
+
+
+Align2(head.Handle,moveHead,CFrame.new(0,0,0),  CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
+Align(handR,moveHandR,CFrame.new(0,0,0),CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
+Align(handL,moveHandL,CFrame.new(0,0,0), CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
+if _G.NitrousHats == true then
+pcall(function()
+Align2(c[_G.Hat1].Handle,moveHead,_G.Hat1Offset, CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
+end)
+pcall(function()
+Align2(c[_G.Hat2].Handle,moveHead,_G.Hat2Offset, CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
+end)
+pcall(function()
+Align2(c[_G.Hat3].Handle,moveHead,_G.Hat3Offset, CFrame.Angles(math.rad(0),math.rad(0),math.rad(0)))
+end)
+end
+input.InputChanged:connect(function(key)
+	if key.KeyCode == Enum.KeyCode.ButtonR1 then
+		if key.Position.Z > 0.9 then
+			R1down = true
+		else
+			R1down = false
+		end
+	end
+end)
+
+input.InputBegan:connect(function(key)
+	if key.KeyCode == Enum.KeyCode.ButtonR1 then
+		R1down = true
+	end
+end)
+
+input.InputEnded:connect(function(key)
+	if key.KeyCode == Enum.KeyCode.ButtonR1 then
+		R1down = false
+	end
+end)
+
+game:GetService("RunService").RenderStepped:connect(function()
+	if R1down then
+		cam.CFrame = cam.CFrame:Lerp(cam.CoordinateFrame + (moveHandR.CFrame*CFrame.Angles(-math.rad(options.righthandrotoffset.X),-math.rad(options.righthandrotoffset.Y),math.rad(180-options.righthandrotoffset.X))).LookVector * cam.HeadScale/2, 0.5)
+	end
+end)
+
+local function bubble(plr,msg)
+	game:GetService("Chat"):Chat(plr.Character.Head,msg,Enum.ChatColor.White)
+end

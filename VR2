@@ -1878,7 +1878,6 @@ local function clovr()
                               a.Parent = char
                               a.Handle.Anchored = false
                               a.Handle.Transparency = 1
-                              print(a.Name)
                          end
                     end
                end

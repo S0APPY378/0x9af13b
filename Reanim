@@ -1116,7 +1116,7 @@ pcall(function()
 	removedl = c.ChildRemoved:Connect(function(v)
 			if v:IsA("Accessory") and haslosthat == false then
 				haslosthat = true
-				respawnfunc()
+				print("Hat lost")
 			end
 	end)
 	if c.Humanoid.RigType == Enum.HumanoidRigType.R6 then

@@ -50,6 +50,26 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 })
 
 
+local function transparent() 
+	for _, child in pairs(char:GetChildren()) do
+		local v = child
+		if child:IsA("BasePart") and not v:IsA("Model") and v.Name == "Torso" or  child:IsA("BasePart") and v.Name == "Right Arm" or  child:IsA("BasePart") and v.Name == "Left Arm" or  child:IsA("BasePart") and v.Name == "Right Leg" or  child:IsA("BasePart") and v.Name == "Left Leg" then
+			if OxideSettings.TransparentRig == true then
+				child.Transparency = .5
+			else 
+				child.Transparency = 1 
+			end
+		elseif child:IsA("Accessory") and v.Name ~= "Black" then
+			if OxideSettings.TransparentRig == true then
+				child.Handle.Transparency = .5
+			else 
+				child.Handle.Transparency = 1 
+			end
+		end
+	end
+end
+
+local curcamcf
 local function respawnfunc()
 	curcamcf = workspace.CurrentCamera.CFrame
 	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)

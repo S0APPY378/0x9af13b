@@ -952,6 +952,7 @@ local function redo2()
 				if char["Right Leg"]:FindFirstChildOfClass("SpecialMesh") then 
 					c["Accessory (rightleg)"].Handle.CFrame = char["Right Leg"].CFrame  * OxideSettings.CH.RightLeg.Orientation  +antisleep+ char["Right Leg"]:FindFirstChildOfClass("SpecialMesh").Offset
 				else
+print("right")
 					c["Accessory (rightleg)"].Handle.CFrame = char["Right Leg"].CFrame  * OxideSettings.CH.RightLeg.Orientation  +antisleep
 				end
 			end

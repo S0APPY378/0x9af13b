@@ -71,6 +71,13 @@ end
 
 local curcamcf
 local function respawnfunc()
+	curcamcf = workspace.CurrentCamera.CFrame
+	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
+	task.wait(game:GetService("Players").RespawnTime)
+	connect:Disconnect()
+	velocity:Disconnect()
+	removedl:Disconnect()
+	transparent()
 end
 
 
@@ -1109,8 +1116,7 @@ pcall(function()
 	removedl = c.ChildRemoved:Connect(function(v)
 			if v:IsA("Accessory") and haslosthat == false then
 				haslosthat = true
-				print("Hat lost")
-                respawnfunc()
+				respawnfunc()
 			end
 	end)
 	if c.Humanoid.RigType == Enum.HumanoidRigType.R6 then

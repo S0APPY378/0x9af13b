@@ -48,6 +48,19 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 	Duration = 20;
 	Text = "This script was made by Hemi"
 })
+
+
+local function respawnfunc()
+	curcamcf = workspace.CurrentCamera.CFrame
+	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
+	task.wait(game:GetService("Players").RespawnTime)
+	connect:Disconnect()
+	velocity:Disconnect()
+	removedl:Disconnect()
+	transparent()
+end
+
+
 local function cfAdd(a,b) return a+b end
 pcall(function()
 task.spawn(function()

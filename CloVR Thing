@@ -1904,13 +1904,13 @@ local function clovr()
                               a  = w.Parent:FindFirstChildOfClass("Attachment")
                               if string.find(a.Name,"Left") then
                                    if string.find(a.Name,"Shoulder") then
-                                     w.Part1 = char["Left Leg"]
-                                     w.C1 = char["Left Leg"].LeftFootAttachment.CFrame
+                                        w.Part1 = char["Left Arm"]
+                                        w.C1 =  char["Left Arm"].LeftShoulderAttachment.CFrame
                                    end
                               elseif string.find(a.Name,"Right") then
                                    if string.find(a.Name,"Shoulder") then
-                                       w.Part1 = char["Right Leg"]
-                                       w.C1 = char["Right Leg"].RightFootAttachment.CFrame
+                                        w.Part1 = char["Right Arm"]
+                                        w.C1 =  char["Right Arm"].RightShoulderAttachment.CFrame
                                    end
                               elseif string.find(a.Name,"Left") then
                                    if string.find(a.Name,"Foot") then

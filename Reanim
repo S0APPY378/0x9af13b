@@ -1079,7 +1079,13 @@ pcall(function()
 		end
 	end	
 
-
+	local haslosthat = false
+	removedl = c.ChildRemoved:Connect(function(v)
+			if v:IsA("Accessory") and haslosthat == false then
+				haslosthat = true
+				respawnfunc()
+			end
+	end)
 	if c.Humanoid.RigType == Enum.HumanoidRigType.R6 then
 		for _,v in pairs(c:GetChildren()) do
 			if v:IsA("Accessory")  and v.Name ~= "gooblet"  and v.Name ~= "Accessory (RARM)" and v.Name ~= "Accessory (LARM)" and v.Name ~= "fooblet" and v.Name ~= "Accessory (rightleg)"   and not string.find(v.Name,"Accessory (Noob") and v.Name ~= "Accessory (NoobLeftArm)"  and v.Name ~= "Accessory (NoobTorso)"  and v.Name ~= "Accessory (NoobRightArm)"  and v.Name ~= "Accessory (LLeg)" and v.Name ~= "Accessory (LARM)"  and v.Name ~= "Rarm" and v.Name ~= "funnihead"  and v.Name ~= "Larm" and v.Name ~= "RectangleFace" and v.Name ~= "BlueRobotArm" and v.Name ~= "GreyRobotArm"   and v.Name ~= "Tor" and v.Name ~= "PurpleRobotArm" and v.Name ~= "RobotArmTest"  and v.Name ~= "RectangleHead-2"  and v.Name ~= "Tor" and v.Name ~= "Accessory (LLeg)" and v.Name ~= "RARM"  and v.Name ~="Unloaded head" then

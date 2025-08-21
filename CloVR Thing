@@ -1,7 +1,7 @@
 _G.Tools = true
-task.spawn(function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/Reanim2"))()
-end)
+--task.spawn(function()
+	--loadstring(game:HttpGet("https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/Reanim2"))()
+--end)
 -- CLOVR - FE FULL-BODY VR SCRIPT
 task.wait(1)
 -- JAN 12TH UPDATE (HEMI) -- FIXED SCRIPT, ADDED TOOL HOLDING, FIXED OTHER STUFF, PERMADEATH SOON!

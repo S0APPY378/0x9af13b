@@ -1893,6 +1893,7 @@ if c.Humanoid.RigType == Enum.HumanoidRigType.R6 then
             end
         end
     end
+end
           else
      
                for _,v in pairs(c:GetChildren()) do

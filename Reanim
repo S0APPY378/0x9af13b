@@ -76,6 +76,7 @@ end
 
 local curcamcf
 local function respawnfunc()
+    print("hats fell!")
 	curcamcf = workspace.CurrentCamera.CFrame
 	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
 	task.wait(game:GetService("Players").RespawnTime)

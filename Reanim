@@ -82,7 +82,6 @@ local function respawnfunc()
 	task.wait(game:GetService("Players").RespawnTime)
 	connect:Disconnect()
 	velocity:Disconnect()
-	removedl:Disconnect()
 	transparent()
 end
 

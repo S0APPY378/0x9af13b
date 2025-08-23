@@ -73,7 +73,7 @@ local function transparent()
 		end
 	end
 end
-local removed1
+local removedl
 local curcamcf
 local function respawnfunc()
     print("hats fell!")
@@ -82,7 +82,7 @@ local function respawnfunc()
 	task.wait(game:GetService("Players").RespawnTime)
 	connect:Disconnect()
 	velocity:Disconnect()
-    removed1:Disconnect()
+    removedl:Disconnect()
 	transparent()
 end
 

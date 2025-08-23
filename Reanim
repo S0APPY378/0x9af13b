@@ -1118,7 +1118,7 @@ pcall(function()
 		end
 	end	
 
-    task.wait(0.2)
+    task.wait(0.5)
     isScriptManipulating = false
 	local haslosthat = false
     removedl = c.ChildRemoved:Connect(function(v)

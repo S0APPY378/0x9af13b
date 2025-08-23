@@ -73,10 +73,10 @@ local function transparent()
 		end
 	end
 end
-local removedl = nil
-local curcamcf = nil
-local connect = nil
-local velocity = nil
+local removedl
+local curcamcf
+local connect
+local velocity
 local function respawnfunc()
     print("hats fell!")
 	curcamcf = workspace.CurrentCamera.CFrame

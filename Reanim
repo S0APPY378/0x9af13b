@@ -79,17 +79,13 @@ local connect
 local velocity
 local function respawnfunc()
     print("hats fell!")
-    curcamcf = workspace.CurrentCamera.CFrame
-    
-    -- Disconnect existing connections to prevent conflicts
-    if connect then connect:Disconnect() end
-    if velocity then velocity:Disconnect() end
-    if removedl then removedl:Disconnect() end
-    
-    replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
-    task.wait(game:GetService("Players").RespawnTime)
-    
-    transparent()
+	curcamcf = workspace.CurrentCamera.CFrame
+	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
+	task.wait(game:GetService("Players").RespawnTime)
+	connect:Disconnect()
+	velocity:Disconnect()
+    removedl:Disconnect()
+	transparent()
 end
 
 

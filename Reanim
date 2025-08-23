@@ -75,6 +75,7 @@ local function transparent()
 end
 local removedl
 local curcamcf
+local connect
 local function respawnfunc()
     print("hats fell!")
 	curcamcf = workspace.CurrentCamera.CFrame

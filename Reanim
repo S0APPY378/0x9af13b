@@ -73,14 +73,16 @@ local function transparent()
 		end
 	end
 end
-local removedl
-local curcamcf
-local connect
+local removedl = nil
+local curcamcf = nil
+local connect = nil
+local velocity = nil
 local function respawnfunc()
     print("hats fell!")
 	curcamcf = workspace.CurrentCamera.CFrame
 	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
-	task.wait(game:GetService("Players").RespawnTime)
+    task.wait(0.5)
+	--task.wait(game:GetService("Players").RespawnTime)
 	connect:Disconnect()
 	velocity:Disconnect()
     removedl:Disconnect()

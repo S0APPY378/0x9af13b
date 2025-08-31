@@ -82,9 +82,15 @@ local function respawnfunc()
 	curcamcf = workspace.CurrentCamera.CFrame
 	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
 	task.wait(game:GetService("Players").RespawnTime)
+    if connect  ~= nil then
 	connect:Disconnect()
+    end
+    if velocity ~= nil then
 	velocity:Disconnect()
+    end
+    if removed1 ~= nil then
     removedl:Disconnect()
+    end
 	transparent()
 end
 

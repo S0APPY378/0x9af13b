@@ -10,9 +10,14 @@ Oxide V3.5
 Anything below should NOT be changed
 ]]
 
+local removedl
+local curcamcf
+local connect
+local velocity
 
-
-
+local isReorganizingHats = false
+local isScriptManipulating = false
+isScriptManipulating = true
 
 
 local str = game:GetService("SharedTableRegistry")
@@ -394,7 +399,15 @@ local function redo()
 	end	
 
 
-
+    task.wait(0.1)
+    isScriptManipulating = false
+	local haslosthat = false
+    removedl = c.ChildRemoved:Connect(function(v)
+    if v:IsA("Accessory") and haslosthat == false and not isScriptManipulating then
+				haslosthat = true
+				respawnfunc()
+			end
+	end)
 
 
 	if c.Humanoid.RigType == Enum.HumanoidRigType.R6 then
@@ -1645,6 +1658,25 @@ pcall(function()
 	end
 
 	local n = 0
+
+
+local function respawnfunc()
+    print("hats fell!")
+	curcamcf = workspace.CurrentCamera.CFrame
+	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
+	task.wait(game:GetService("Players").RespawnTime)
+    if connect  ~= nil then
+	connect:Disconnect()
+    end
+    if velocity ~= nil then
+	velocity:Disconnect()
+    end
+    if removedl ~= nil then
+    removedl:Disconnect()
+    end
+	transparent()
+end
+
 
 	local function transparent() 
 		for _, child in pairs(char:GetChildren()) do

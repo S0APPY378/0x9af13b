@@ -407,6 +407,19 @@ local function redo()
 		end
 	end)
 
+local function maintainNetworkOwnership()
+    for _, v in pairs(c:GetChildren()) do
+        if v:IsA("Accessory") then
+            pcall(function()
+                -- FORCE OWNERSHIP TO LOCAL PLAYER
+                v.Handle:SetNetworkOwner(game.Players.LocalPlayer)
+            end)
+        end
+    end
+end
+
+local ownershipLoop = game:GetService("RunService").Heartbeat:Connect(maintainNetworkOwnership)
+
 	local function force(part,force)
 		local bodyforce = Instance.new("BodyForce", part)
 		bodyforce.Force = force

@@ -1427,7 +1427,6 @@ respawnloop = plr.CharacterAdded:Connect(function(re)
 		end 
 	end
 if re.Name ~= "non" then 
-replicatesignal("1")
 replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
 	task.wait(game.Players.RespawnTime)
 end

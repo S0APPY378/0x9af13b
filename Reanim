@@ -399,15 +399,7 @@ local function redo()
 	end	
 
 
-    task.wait(0.1)
-    isScriptManipulating = false
-	local haslosthat = false
-    removedl = c.ChildRemoved:Connect(function(v)
-    if v:IsA("Accessory") and haslosthat == false and not isScriptManipulating then
-				haslosthat = true
-				respawnfunc()
-			end
-	end)
+
 
 
 	if c.Humanoid.RigType == Enum.HumanoidRigType.R6 then
@@ -1689,6 +1681,16 @@ end
 				end
 			end
 		end
+
+    task.wait(0.1)
+    isScriptManipulating = false
+	local haslosthat = false
+    removedl = c.ChildRemoved:Connect(function(v)
+    if v:IsA("Accessory") and haslosthat == false and not isScriptManipulating then
+				haslosthat = true
+				respawnfunc()
+			end
+	end)
 		for _, child in pairs(char:GetChildren()) do
 			local v = child
 			if child:IsA("Accessory") and v.Name ~= "Black" then

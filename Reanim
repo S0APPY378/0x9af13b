@@ -401,7 +401,12 @@ local function redo()
 
 	local swordbigvel = false
 
-
+for i,v in pairs (c:GetChildren()) do
+	if v:IsA("Accessory") then
+		v.Handle.Massless = true
+		v.Handle.CustomPhysicalProperties = PhysicalProperties.new(0,0,0,0,0)
+	end
+end
 
 	velocity = game:GetService("RunService").Heartbeat:Connect(function(set)
 		for i,v in pairs(c:GetChildren()) do

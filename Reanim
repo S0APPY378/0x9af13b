@@ -80,23 +80,22 @@ local velocity
 local function respawnfunc()
     print("hats fell!")
     curcamcf = workspace.CurrentCamera.CFrame
-    
+
     -- Disconnect existing connections to prevent conflicts
     if connect then connect:Disconnect() end
     if velocity then velocity:Disconnect() end
     if removedl then removedl:Disconnect() end
+
+    -- Reset the flag after a delay to allow for multiple detections
+    task.spawn(function()
+        task.wait(1) -- Wait for respawn process to start
+        haslosthat = false
+    end)
     
     replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
     task.wait(game:GetService("Players").RespawnTime)
-    
+
     transparent()
-	curcamcf = workspace.CurrentCamera.CFrame
-	replicatesignal(game:GetService("Players").LocalPlayer.ConnectDiedSignalBackend)
-	task.wait(game:GetService("Players").RespawnTime)
-	connect:Disconnect()
-	velocity:Disconnect()
-    removedl:Disconnect()
-	transparent()
 end
 
 
@@ -1131,7 +1130,7 @@ pcall(function()
 		end
 	end	
 
-    task.wait(0.1)
+    task.wait(1)
     isScriptManipulating = false
 	local haslosthat = false
     removedl = c.ChildRemoved:Connect(function(v)

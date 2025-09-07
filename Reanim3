@@ -4,7 +4,7 @@ noclip = true,
 FlingEnabled = false,
 ToolFling = false, -- false = holding, true = fling
 AntiFling = false,
-Legacy = false,
+Legacy = true,
 Scale = 1,
 ClientHats = {},
 CustomHats = false, -- Enable or disable custom rig feature (basically old oxide when false)
@@ -758,7 +758,6 @@ local function redo2()
 					v.Handle.AssemblyLinearVelocity = Vector3.new(char.Torso.AssemblyLinearVelocity.X*15 -(10*math.cos(os.clock()*1000))   , 28.5312+math.sin(os.clock()*1000), char.Torso.AssemblyLinearVelocity.Z*15+(3*math.sin(os.clock()*12000))) 
 					v.Handle.AssemblyAngularVelocity = Vector3.new(0, sin(clock()*10), 0) + char.Torso.AssemblyAngularVelocity * 2
 					v.Handle.CanCollide = false
-          v.Handle.Massless = true
 				end
 			end
 		end)
@@ -774,7 +773,6 @@ local function redo2()
 							v.Handle.AssemblyLinearVelocity = Vector3.new(9e9 -9e7, 9e9) 
 							v.Handle.AssemblyAngularVelocity = Vector3.new(9e9 -9e7, 9e9) 
 							v.Handle.CanCollide = false
-                  v.Handle.Massless = true
 						end)
 					else 
 						v.Handle.AssemblyLinearVelocity = Vector3.new(char.Torso.AssemblyLinearVelocity.X*15 -5   , 35.499+math.sin(os.clock()*100), char.Torso.AssemblyLinearVelocity.Z*15 +5) 

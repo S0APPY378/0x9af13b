@@ -402,7 +402,6 @@ local function redo()
 	velocity = game:GetService("RunService").Heartbeat:Connect(function(set)
 		for i,v in pairs(c:GetChildren()) do
 			if v:IsA("Accessory")  then
-                v.Handle.Massless = true
 				v.Handle.AssemblyLinearVelocity = Vector3.new(char.Torso.AssemblyLinearVelocity.X*25, 25.01, char.Torso.AssemblyLinearVelocity*25)
 			end
 		end
@@ -489,7 +488,6 @@ local function redo()
 					a.Handle.Transparency = 1
 					a.Handle.Position = char.Head.Position
 					a.Handle.Velocity = Vector3.new(0,0,0)
-					a.Handle.Massless = true
 					w = Instance.new("Weld",z.Handle)
 					w.C0 = w.Parent:FindFirstChildOfClass("Attachment").CFrame
 					w.Name = "AccessoryWeld"
@@ -1165,7 +1163,6 @@ pcall(function()
 					a.Handle.Transparency = 1
 					a.Handle.CFrame = char.HumanoidRootPart.CFrame
 					a.Handle.Velocity = Vector3.new(0,0,0)
-					a.Handle.Massless = true
 					w = Instance.new("Weld",z.Handle)
 					w.C0 = w.Parent:FindFirstChildOfClass("Attachment").CFrame
 					w.Name = "AccessoryWeld"

@@ -3,8 +3,8 @@ _G.FlingEnabled = false
 _G.TransparentRig = true
 _G.ToolFling = false -- false = holding, true = fling
 _G.AntiFling = true
-_G.ClickFling = true
-_G.TeleportCharacter = true
+_G.ClickFling = false
+_G.TeleportCharacter = false
 --[[ 
 Oxide V3.5
 Anything below should NOT be changed

@@ -1,4 +1,4 @@
-_G.HideCharacter = true
+_G.HideCharacter = false
 _G.FlingEnabled = false
 _G.TransparentRig = true
 _G.ToolFling = false -- false = holding, true = fling
@@ -1346,7 +1346,6 @@ pcall(function()
 					pcall(function()
 						  v.Handle.AssemblyLinearVelocity = Vector3.new(char["Left Arm"].AssemblyLinearVelocity.X*15 -10*math.clamp(math.sin(os.clock()*1000),0.5,1)   ,30.499+math.sin(os.clock()*10000), char["Left Arm"].AssemblyLinearVelocity.Z*15 +6) 
 						v.Handle.CanCollide = false
-                        v.Handle.Massless = true
 					end)
 				end
 			end
@@ -1361,7 +1360,6 @@ pcall(function()
 						v.Handle.AssemblyLinearVelocity = Vector3.new(9e9 -9e7, 9e9) 
 						v.Handle.AssemblyAngularVelocity = Vector3.new(9e9 -9e7, 9e9) 
 						v.Handle.CanCollide = false
-                         v.Handle.Massless = true
 					end)
 				end
 			end

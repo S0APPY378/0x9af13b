@@ -659,20 +659,24 @@ _G.R15toR6 = false -- no settings work
 
 	if _G.ReanimatedAnimations == true then
 		pcall(function()
+if c:FindFirstChild("Animate") then 
 			c.Animate.Disabled = true
 			c.Animate.Disabled = false
 			char.Animate:Destroy()
 			c.Animate.Parent = char
 			char.Animate.Disabled = true
 			--char.Animate.Disabled = false
+end
 		end)
 		c.Humanoid.Animator.Parent = char.Humanoid
 		workspace.CurrentCamera.CameraSubject = char.Humanoid
 	else 
+if c:FindFirstChild("Animate") then 
 		char.Animate:Destroy()
 		c.Animate.Disabled = true
 		c.Animate.Parent = char
 		char.Animate.Disabled = true
+end
 		c.Humanoid.Animator.Parent = char.Humanoid
 		workspace.CurrentCamera.CameraSubject = char.Humanoid
 	end

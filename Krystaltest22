@@ -83,7 +83,7 @@ getmetatable(is).__namecall = function(_, id)
     return loadlocalasset(id)
 end
 
-local idleanim = is:LoadLocalAsset('rbxassetid://11442092457') -- uuid. 136078657506707
+local idleanim = is:LoadLocalAsset('rbxassetid://101374633471316') -- uuid. 136078657506707
 local walkanim = is:LoadLocalAsset('rbxassetid://15059245473') -- uuid. 130213485744288
 local sprintanim = is:LoadLocalAsset('rbxassetid://15059245473') -- uuid. 119558526211035
 local randompart = Instance.new('Part', game:GetService('RunService'))

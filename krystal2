@@ -612,14 +612,14 @@ local function stopanim()
     playanother = true
     playanother = true
     playanother = true
-    sound69.PlaybackSpeed = 1
+    sound69.PlaybackSpeed = 0
     if playbacktrack == true then
         if lol ~= true then
             sound69.SoundId = customasset('Dances/myuu.mp3')
         else
             sound69.SoundId = customasset('Dances/emoboy.mp3')
         end
-        sound69.Volume = 0.75
+        sound69.Volume = 0
     else
         sound69:Stop()
     end

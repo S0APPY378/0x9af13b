@@ -1072,6 +1072,7 @@ local function redo2()
 		if OxideSettings.Refit == true then
 			if v:IsA("Accessory") and haslosthat == false then
 				haslosthat = true
+print("lost hat")
 				respawnfunc()
 			end
 		end

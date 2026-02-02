@@ -1,0 +1,763 @@
+-- REPLACE THESE URLS WITH YOUR RAW GITHUB LINKS
+local CUSTOM_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/bombparty_dictionary1.txt"
+local HYPHEN_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/HYPHEN_bombparty_dictionary.txt"
+local PHOBIA_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/PHOBIA_bombparty_dictionary.txt"
+local ISM_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/ISM_Practice"
+local ASH_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/ASHWORD_Practice"
+local OLOGY_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/LOGY_Practice"
+local EXPERT_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/EXPERT_Practice"
+
+-- Mobile Detection
+local UserInputService = game:GetService("UserInputService")
+local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+print("Device Type: " .. (IsMobile and "Mobile" or "Desktop"))
+
+-- UI Scale based on device
+local UIScale = {
+    FrameWidth = IsMobile and 180 or 250,
+    FrameHeight = IsMobile and 300 or 400,
+    TitleHeight = IsMobile and 28 or 35,
+    TitleFontSize = IsMobile and 13 or 16,
+    PromptFontSize = IsMobile and 11 or 14,
+    WordFontSize = IsMobile and 11 or 14,
+    WordHeight = IsMobile and 20 or 25,
+    Padding = IsMobile and 3 or 5,
+    ScrollBarThickness = IsMobile and 4 or 6,
+    CornerRadius = IsMobile and 6 or 8
+}
+
+-- [Dictionary loading code - keeping original implementation]
+local WordIndex = {}
+local HyphenIndex = {}
+local PhobiaIndex = {}
+local IsmIndex = {}
+local AshIndex = {}
+local OlogyIndex = {}
+local ExpertIndex = {}
+local AllWords = {}
+local HyphenWords = {}
+local PhobiaWords = {}
+local IsmWords = {}
+local AshWords = {}
+local OlogyWords = {}
+local ExpertWords = {}
+
+local function LoadCustomDictionary(url)
+    local success, result = pcall(function()
+        return game:HttpGet(url)
+    end)
+    
+    if not success then
+        warn("Failed to load custom dictionary:", result)
+        return {}
+    end
+    
+    local words = {}
+    for word in result:gmatch("[^\r\n]+") do
+        local cleaned = word:match("^%s*(.-)%s*$")
+        if cleaned and cleaned ~= "" then
+            table.insert(words, cleaned)
+        end
+    end
+    
+    return words
+end
+
+local function BuildWordIndex(words)
+    print("Building word index...")
+    local index = {}
+    
+    for _, word in ipairs(words) do
+        local lowerWord = string.lower(word)
+        for i = 1, #lowerWord - 1 do
+            for len = 2, math.min(3, #lowerWord - i + 1) do
+                local substr = string.sub(lowerWord, i, i + len - 1)
+                if not index[substr] then
+                    index[substr] = {}
+                end
+                table.insert(index[substr], word)
+            end
+        end
+    end
+    
+    print("Index built with " .. #words .. " words!")
+    return index
+end
+
+-- Load all dictionaries
+print("Loading dictionaries...")
+AllWords = LoadCustomDictionary(CUSTOM_DICTIONARY_URL)
+WordIndex = BuildWordIndex(AllWords)
+
+HyphenWords = LoadCustomDictionary(HYPHEN_DICTIONARY_URL)
+if #HyphenWords == 0 then
+    for _, word in ipairs(AllWords) do
+        if string.find(word, "-", 1, true) then
+            table.insert(HyphenWords, word)
+        end
+    end
+end
+HyphenIndex = BuildWordIndex(HyphenWords)
+
+PhobiaWords = LoadCustomDictionary(PHOBIA_DICTIONARY_URL)
+if #PhobiaWords == 0 then
+    for _, word in ipairs(AllWords) do
+        if string.find(string.lower(word), "phobia", 1, true) then
+            table.insert(PhobiaWords, word)
+        end
+    end
+end
+PhobiaIndex = BuildWordIndex(PhobiaWords)
+
+IsmWords = LoadCustomDictionary(ISM_DICTIONARY_URL)
+if #IsmWords == 0 then
+    for _, word in ipairs(AllWords) do
+        if string.find(string.lower(word), "ism", 1, true) then
+            table.insert(IsmWords, word)
+        end
+    end
+end
+IsmIndex = BuildWordIndex(IsmWords)
+
+AshWords = LoadCustomDictionary(ASH_DICTIONARY_URL)
+if #AshWords == 0 then
+    for _, word in ipairs(AllWords) do
+        if string.find(string.lower(word), "ash", 1, true) then
+            table.insert(AshWords, word)
+        end
+    end
+end
+AshIndex = BuildWordIndex(AshWords)
+
+OlogyWords = LoadCustomDictionary(OLOGY_DICTIONARY_URL)
+if #OlogyWords == 0 then
+    for _, word in ipairs(AllWords) do
+        local lowerWord = string.lower(word)
+        if string.find(lowerWord, "logy", 1, true) or 
+           string.find(lowerWord, "logic", 1, true) then
+            table.insert(OlogyWords, word)
+        end
+    end
+end
+OlogyIndex = BuildWordIndex(OlogyWords)
+
+ExpertWords = LoadCustomDictionary(EXPERT_DICTIONARY_URL)
+if #ExpertWords == 0 then
+    ExpertWords = AllWords
+end
+ExpertIndex = BuildWordIndex(ExpertWords)
+
+print("Loaded: " .. #AllWords .. " words | " .. #HyphenWords .. " hyphenated | " .. #PhobiaWords .. " phobias | " .. #IsmWords .. " isms | " .. #AshWords .. " ash | " .. #OlogyWords .. " ology | " .. #ExpertWords .. " expert")
+
+-- Services
+local Player = game:GetService("Players").LocalPlayer
+local Games = game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Games")
+local GameID = "-1"
+local UsedWords = {}
+
+-- Multi-Frame System
+local SuggestionFrames = {}
+local NextFrameID = 1
+
+-- Get current prompt letters
+local function GetLetters()
+    for _, v in pairs(getgc()) do
+        if type(v) == "function" and debug.getinfo(v).name == "updateInfoFrame" then
+            for __, vv in pairs(debug.getupvalues(v)) do
+                if type(vv) == "table" and vv.Prompt ~= nil then
+                    return vv.Prompt
+                end
+            end
+        end
+    end
+    return ""
+end
+
+-- Find matching words
+local function FindWords(letters, settings)
+    if not letters or letters == "" then return {} end
+    
+    local searchLetters = settings.CaseSensitive and letters or string.lower(letters)
+    local results = {}
+    local seenWords = {}
+    
+    local activeIndex, activeWords
+    if settings.ExpertMode then
+        activeIndex, activeWords = ExpertIndex, ExpertWords
+    elseif settings.PhobiaMode then
+        activeIndex, activeWords = PhobiaIndex, PhobiaWords
+    elseif settings.IsmMode then
+        activeIndex, activeWords = IsmIndex, IsmWords
+    elseif settings.AshMode then
+        activeIndex, activeWords = AshIndex, AshWords
+    elseif settings.OlogyMode then
+        activeIndex, activeWords = OlogyIndex, OlogyWords
+    elseif settings.HyphenMode then
+        activeIndex, activeWords = HyphenIndex, HyphenWords
+    else
+        activeIndex, activeWords = WordIndex, AllWords
+    end
+    
+    local candidates = {}
+    if #searchLetters >= 2 and #searchLetters <= 3 and activeIndex[searchLetters] then
+        candidates = activeIndex[searchLetters]
+    else
+        if #searchLetters > 3 then
+            local substr = string.sub(searchLetters, 1, 3)
+            candidates = activeIndex[substr] or activeWords
+        else
+            candidates = activeWords
+        end
+    end
+    
+    if settings.RandomOrder then
+        local shuffled = {}
+        for _, word in ipairs(candidates) do
+            table.insert(shuffled, word)
+        end
+        for i = #shuffled, 2, -1 do
+            local j = math.random(i)
+            shuffled[i], shuffled[j] = shuffled[j], shuffled[i]
+        end
+        candidates = shuffled
+    end
+    
+    for _, word in ipairs(candidates) do
+        if #results >= settings.MaxSuggestions * 3 then break end
+        
+        if not seenWords[word] then
+            seenWords[word] = true
+            local searchWord = settings.CaseSensitive and word or string.lower(word)
+            
+            if string.find(searchWord, searchLetters, 1, true) then
+                local isUsed = table.find(UsedWords, word)
+                if settings.ShowUsedWords or not isUsed then
+                    local lowerWord = string.lower(word)
+                    table.insert(results, {
+                        word = word,
+                        length = #word,
+                        used = isUsed,
+                        hasHyphen = string.find(word, "-", 1, true) ~= nil,
+                        isPhobia = string.find(lowerWord, "phobia", 1, true) ~= nil,
+                        isIsm = string.find(lowerWord, "ism", 1, true) ~= nil,
+                        isAsh = string.find(lowerWord, "ash", 1, true) ~= nil,
+                        isOlogy = string.find(lowerWord, "logy", 1, true) ~= nil or string.find(lowerWord, "logic", 1, true) ~= nil,
+                        isExpert = settings.ExpertMode
+                    })
+                end
+            end
+        end
+    end
+    
+    if settings.ShortWordsMode then
+        table.sort(results, function(a, b) return a.length < b.length end)
+    elseif settings.SortByLength then
+        table.sort(results, function(a, b)
+            if a.length == b.length then return a.word < b.word end
+            return a.length > b.length
+        end)
+    elseif not settings.RandomOrder then
+        table.sort(results, function(a, b) return a.word < b.word end)
+    end
+    
+    local limited = {}
+    for i = 1, math.min(#results, settings.MaxSuggestions) do
+        table.insert(limited, results[i])
+    end
+    
+    return limited
+end
+
+-- Create a new draggable suggestion frame
+local function CreateSuggestionFrame(frameID, initialPosition)
+    local frameData = {
+        ID = frameID,
+        Settings = {
+            ShowSuggestions = true,
+            MaxSuggestions = IsMobile and 8 or 10,
+            SortByLength = false,
+            RandomOrder = true,
+            ShowUsedWords = true,
+            CaseSensitive = false,
+            HyphenMode = false,
+            PhobiaMode = false,
+            IsmMode = false,
+            AshMode = false,
+            OlogyMode = false,
+            ExpertMode = false,
+            ShortWordsMode = false
+        }
+    }
+    
+    -- Calculate position for mobile (centered, stacked vertically)
+    local defaultPosition
+    if IsMobile then
+        -- Center horizontally, stack vertically with spacing
+        local yOffset = 0.15 + ((frameID - 1) * 0.35)
+        defaultPosition = UDim2.new(0.5, -UIScale.FrameWidth / 2, yOffset, 0)
+    else
+        -- Desktop: original horizontal layout
+        defaultPosition = UDim2.new(0.02 + (frameID - 1) * 0.18, 0, 0.3, 0)
+    end
+    
+    -- Create main frame
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "SuggestionFrame_" .. frameID
+    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Position = initialPosition or defaultPosition
+    MainFrame.Size = UDim2.new(0, UIScale.FrameWidth, 0, UIScale.FrameHeight)
+    MainFrame.Parent = Player.PlayerGui:WaitForChild("WordSuggester")
+    
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, UIScale.CornerRadius)
+    UICorner.Parent = MainFrame
+    
+    -- Make draggable
+    local dragging, dragInput, dragStart, startPos
+    
+    MainFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    MainFrame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    -- Title bar
+    local Title = Instance.new("TextLabel")
+    Title.Name = "Title"
+    Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    Title.BorderSizePixel = 0
+    Title.Size = UDim2.new(1, 0, 0, UIScale.TitleHeight)
+    Title.Font = Enum.Font.GothamBold
+    Title.Text = IsMobile and "Sug #" .. frameID or "Suggestions #" .. frameID
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = UIScale.TitleFontSize
+    Title.Parent = MainFrame
+    
+    local TitleCorner = Instance.new("UICorner")
+    TitleCorner.CornerRadius = UDim.new(0, UIScale.CornerRadius)
+    TitleCorner.Parent = Title
+    
+    -- Close button
+    local closeButtonSize = IsMobile and 20 or 25
+    local CloseButton = Instance.new("TextButton")
+    CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    CloseButton.BorderSizePixel = 0
+    CloseButton.Position = UDim2.new(1, -(closeButtonSize + 3), 0, (UIScale.TitleHeight - closeButtonSize) / 2)
+    CloseButton.Size = UDim2.new(0, closeButtonSize, 0, closeButtonSize)
+    CloseButton.Font = Enum.Font.GothamBold
+    CloseButton.Text = "X"
+    CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseButton.TextSize = IsMobile and 11 or 14
+    CloseButton.Parent = Title
+    
+    local CloseCorner = Instance.new("UICorner")
+    CloseCorner.CornerRadius = UDim.new(0, 4)
+    CloseCorner.Parent = CloseButton
+    
+    CloseButton.MouseButton1Click:Connect(function()
+        MainFrame:Destroy()
+        SuggestionFrames[frameID] = nil
+    end)
+    
+    -- Prompt label
+    local promptYOffset = UIScale.TitleHeight + (IsMobile and 3 or 5)
+    local PromptLabel = Instance.new("TextLabel")
+    PromptLabel.BackgroundTransparency = 1
+    PromptLabel.Position = UDim2.new(0, IsMobile and 5 or 10, 0, promptYOffset)
+    PromptLabel.Size = UDim2.new(1, IsMobile and -10 or -20, 0, IsMobile and 18 or 25)
+    PromptLabel.Font = Enum.Font.GothamBold
+    PromptLabel.Text = "Letters: --"
+    PromptLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
+    PromptLabel.TextSize = UIScale.PromptFontSize
+    PromptLabel.TextXAlignment = Enum.TextXAlignment.Left
+    PromptLabel.Parent = MainFrame
+    
+    -- Special mode label
+    local modeYOffset = promptYOffset + (IsMobile and 18 or 22)
+    local SpecialModeLabel = Instance.new("TextLabel")
+    SpecialModeLabel.BackgroundTransparency = 1
+    SpecialModeLabel.Position = UDim2.new(0, IsMobile and 5 or 10, 0, modeYOffset)
+    SpecialModeLabel.Size = UDim2.new(1, IsMobile and -10 or -20, 0, IsMobile and 15 or 20)
+    SpecialModeLabel.Font = Enum.Font.Gotham
+    SpecialModeLabel.Text = ""
+    SpecialModeLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
+    SpecialModeLabel.TextSize = IsMobile and 8 or 10
+    SpecialModeLabel.TextXAlignment = Enum.TextXAlignment.Left
+    SpecialModeLabel.Visible = false
+    SpecialModeLabel.Parent = MainFrame
+    
+    -- Scroll frame for words
+    local scrollYOffset = modeYOffset + (IsMobile and 18 : 23)
+    local ScrollFrame = Instance.new("ScrollingFrame")
+    ScrollFrame.BackgroundTransparency = 1
+    ScrollFrame.Position = UDim2.new(0, UIScale.Padding, 0, scrollYOffset)
+    ScrollFrame.Size = UDim2.new(1, -UIScale.Padding * 2, 1, -(scrollYOffset + UIScale.Padding))
+    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    ScrollFrame.ScrollBarThickness = UIScale.ScrollBarThickness
+    ScrollFrame.BorderSizePixel = 0
+    ScrollFrame.Parent = MainFrame
+    
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, IsMobile and 2 or 3)
+    ListLayout.Parent = ScrollFrame
+    
+    frameData.MainFrame = MainFrame
+    frameData.PromptLabel = PromptLabel
+    frameData.SpecialModeLabel = SpecialModeLabel
+    frameData.ScrollFrame = ScrollFrame
+    frameData.ListLayout = ListLayout
+    
+    -- Update function
+    frameData.Update = function()
+        for _, child in pairs(ScrollFrame:GetChildren()) do
+            if child:IsA("TextLabel") then
+                child:Destroy()
+            end
+        end
+        
+        local letters = GetLetters()
+        PromptLabel.Text = (IsMobile and "L: " or "Letters: ") .. (letters ~= "" and string.upper(letters) or "--")
+        
+        if not frameData.Settings.ShowSuggestions or letters == "" then
+            SpecialModeLabel.Visible = false
+            return
+        end
+        
+        local words = FindWords(letters, frameData.Settings)
+        
+        -- Update special mode label
+        if frameData.Settings.ExpertMode then
+            SpecialModeLabel.Visible = true
+            SpecialModeLabel.Text = IsMobile and "Expert" or "Expert Mode"
+            SpecialModeLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+        elseif frameData.Settings.HyphenMode then
+            SpecialModeLabel.Visible = true
+            SpecialModeLabel.Text = IsMobile and "Hyphen" or "Hyphen Mode"
+            SpecialModeLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
+        elseif frameData.Settings.PhobiaMode then
+            SpecialModeLabel.Visible = true
+            SpecialModeLabel.Text = IsMobile and "Phobia" or "Phobia Mode"
+            SpecialModeLabel.TextColor3 = Color3.fromRGB(255, 150, 200)
+        elseif frameData.Settings.IsmMode then
+            SpecialModeLabel.Visible = true
+            SpecialModeLabel.Text = IsMobile and "Ism" or "Ism Mode"
+            SpecialModeLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+        elseif frameData.Settings.AshMode then
+            SpecialModeLabel.Visible = true
+            SpecialModeLabel.Text = IsMobile and "Ash" or "Ash Mode"
+            SpecialModeLabel.TextColor3 = Color3.fromRGB(255, 180, 100)
+        elseif frameData.Settings.OlogyMode then
+            SpecialModeLabel.Visible = true
+            SpecialModeLabel.Text = IsMobile and "Ology" or "Ology Mode"
+            SpecialModeLabel.TextColor3 = Color3.fromRGB(150, 255, 200)
+        elseif frameData.Settings.ShortWordsMode then
+            SpecialModeLabel.Visible = true
+            SpecialModeLabel.Text = IsMobile and "Short" or "Short Words"
+            SpecialModeLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+        else
+            SpecialModeLabel.Visible = false
+        end
+        
+        if #words == 0 then
+            local noWords = Instance.new("TextLabel")
+            noWords.BackgroundTransparency = 1
+            noWords.Size = UDim2.new(1, -10, 0, UIScale.WordHeight)
+            noWords.Font = Enum.Font.Gotham
+            noWords.Text = "No words found"
+            noWords.TextColor3 = Color3.fromRGB(150, 150, 150)
+            noWords.TextSize = UIScale.WordFontSize - 2
+            noWords.TextXAlignment = Enum.TextXAlignment.Left
+            noWords.Parent = ScrollFrame
+            return
+        end
+        
+        for i, wordData in ipairs(words) do
+            local wordLabel = Instance.new("TextLabel")
+            
+            local bgColor = Color3.fromRGB(40, 40, 40)
+            if wordData.used then
+                bgColor = Color3.fromRGB(60, 40, 40)
+            elseif frameData.Settings.ExpertMode and wordData.isExpert then
+                bgColor = Color3.fromRGB(60, 55, 30)
+            elseif frameData.Settings.HyphenMode and wordData.hasHyphen then
+                bgColor = Color3.fromRGB(40, 60, 50)
+            elseif frameData.Settings.PhobiaMode and wordData.isPhobia then
+                bgColor = Color3.fromRGB(60, 40, 55)
+            elseif frameData.Settings.IsmMode and wordData.isIsm then
+                bgColor = Color3.fromRGB(40, 50, 60)
+            elseif frameData.Settings.AshMode and wordData.isAsh then
+                bgColor = Color3.fromRGB(60, 50, 40)
+            elseif frameData.Settings.OlogyMode and wordData.isOlogy then
+                bgColor = Color3.fromRGB(40, 60, 55)
+            end
+            
+            wordLabel.BackgroundColor3 = bgColor
+            wordLabel.BorderSizePixel = 0
+            wordLabel.Size = UDim2.new(1, -10, 0, UIScale.WordHeight)
+            wordLabel.Font = Enum.Font.GothamMedium
+            wordLabel.Text = string.upper(wordData.word) .. " (" .. wordData.length .. ")"
+            wordLabel.TextColor3 = wordData.used and Color3.fromRGB(150, 150, 150) or Color3.fromRGB(255, 255, 255)
+            wordLabel.TextSize = UIScale.WordFontSize
+            wordLabel.TextXAlignment = Enum.TextXAlignment.Left
+            wordLabel.TextTruncate = Enum.TextTruncate.AtEnd
+            wordLabel.Parent = ScrollFrame
+            
+            local padding = Instance.new("UIPadding")
+            padding.PaddingLeft = UDim.new(0, IsMobile and 5 or 8)
+            padding.Parent = wordLabel
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 4)
+            corner.Parent = wordLabel
+        end
+        
+        ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 5)
+    end
+    
+    return frameData
+end
+
+-- Create base ScreenGui
+local SuggestionGui = Instance.new("ScreenGui")
+SuggestionGui.Name = "WordSuggester"
+SuggestionGui.ResetOnSpawn = false
+SuggestionGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SuggestionGui.Parent = Player.PlayerGui
+
+-- Create first frame
+local firstFrame = CreateSuggestionFrame(NextFrameID)
+SuggestionFrames[NextFrameID] = firstFrame
+NextFrameID = NextFrameID + 1
+
+-- Settings GUI
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Pstrw/Reuploaded-Librarys/main/Venyx/source.lua"))()
+local Venyx = Library.new("jengu.lol   I   Word Suggester " .. (IsMobile and "(Mobile)" or "(Desktop)"), 5013109572)
+
+local Tabs = {Main = Venyx:addPage("Main", 5012544693)}
+local Sections = {
+    Frame_Section = Tabs.Main:addSection("Frame Management"),
+    Display_Section = Tabs.Main:addSection("Frame Settings"),
+    Filter_Section = Tabs.Main:addSection("Filter Settings"),
+    Actions_Section = Tabs.Main:addSection("Actions")
+}
+
+local selectedFrameID = 1
+
+-- Frame Management
+Sections.Frame_Section:addButton("Create New Frame", function()
+    local newFrame = CreateSuggestionFrame(NextFrameID)
+    SuggestionFrames[NextFrameID] = newFrame
+    print("Created frame #" .. NextFrameID)
+    NextFrameID = NextFrameID + 1
+end)
+
+Sections.Frame_Section:addSlider("Select Frame", 1, 10, 1, function(value)
+    selectedFrameID = value
+end)
+
+-- Display Settings
+Sections.Display_Section:addToggle("Show Frame", true, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.ShowSuggestions = value
+        SuggestionFrames[selectedFrameID].MainFrame.Visible = value
+        if value then SuggestionFrames[selectedFrameID].Update() end
+    end
+end)
+
+Sections.Display_Section:addToggle("Expert Mode", false, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.ExpertMode = value
+        if value then
+            SuggestionFrames[selectedFrameID].Settings.HyphenMode = false
+            SuggestionFrames[selectedFrameID].Settings.PhobiaMode = false
+            SuggestionFrames[selectedFrameID].Settings.IsmMode = false
+            SuggestionFrames[selectedFrameID].Settings.AshMode = false
+            SuggestionFrames[selectedFrameID].Settings.OlogyMode = false
+            SuggestionFrames[selectedFrameID].Settings.ShortWordsMode = false
+        end
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Display_Section:addToggle("Hyphen Mode", false, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.HyphenMode = value
+        if value then
+            SuggestionFrames[selectedFrameID].Settings.ExpertMode = false
+            SuggestionFrames[selectedFrameID].Settings.PhobiaMode = false
+            SuggestionFrames[selectedFrameID].Settings.IsmMode = false
+            SuggestionFrames[selectedFrameID].Settings.AshMode = false
+            SuggestionFrames[selectedFrameID].Settings.OlogyMode = false
+            SuggestionFrames[selectedFrameID].Settings.ShortWordsMode = false
+        end
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Display_Section:addToggle("Phobia Mode", false, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.PhobiaMode = value
+        if value then
+            SuggestionFrames[selectedFrameID].Settings.ExpertMode = false
+            SuggestionFrames[selectedFrameID].Settings.HyphenMode = false
+            SuggestionFrames[selectedFrameID].Settings.IsmMode = false
+            SuggestionFrames[selectedFrameID].Settings.AshMode = false
+            SuggestionFrames[selectedFrameID].Settings.OlogyMode = false
+            SuggestionFrames[selectedFrameID].Settings.ShortWordsMode = false
+        end
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Display_Section:addToggle("Ism Mode", false, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.IsmMode = value
+        if value then
+            SuggestionFrames[selectedFrameID].Settings.ExpertMode = false
+            SuggestionFrames[selectedFrameID].Settings.HyphenMode = false
+            SuggestionFrames[selectedFrameID].Settings.PhobiaMode = false
+            SuggestionFrames[selectedFrameID].Settings.AshMode = false
+            SuggestionFrames[selectedFrameID].Settings.OlogyMode = false
+            SuggestionFrames[selectedFrameID].Settings.ShortWordsMode = false
+        end
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Display_Section:addToggle("Ash Mode", false, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.AshMode = value
+        if value then
+            SuggestionFrames[selectedFrameID].Settings.ExpertMode = false
+            SuggestionFrames[selectedFrameID].Settings.HyphenMode = false
+            SuggestionFrames[selectedFrameID].Settings.PhobiaMode = false
+            SuggestionFrames[selectedFrameID].Settings.IsmMode = false
+            SuggestionFrames[selectedFrameID].Settings.OlogyMode = false
+            SuggestionFrames[selectedFrameID].Settings.ShortWordsMode = false
+        end
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Display_Section:addToggle("Ology Mode", false, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.OlogyMode = value
+        if value then
+            SuggestionFrames[selectedFrameID].Settings.ExpertMode = false
+            SuggestionFrames[selectedFrameID].Settings.HyphenMode = false
+            SuggestionFrames[selectedFrameID].Settings.PhobiaMode = false
+            SuggestionFrames[selectedFrameID].Settings.IsmMode = false
+            SuggestionFrames[selectedFrameID].Settings.AshMode = false
+            SuggestionFrames[selectedFrameID].Settings.ShortWordsMode = false
+        end
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Display_Section:addToggle("Short Words Mode", false, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.ShortWordsMode = value
+        if value then
+            SuggestionFrames[selectedFrameID].Settings.ExpertMode = false
+            SuggestionFrames[selectedFrameID].Settings.HyphenMode = false
+            SuggestionFrames[selectedFrameID].Settings.PhobiaMode = false
+            SuggestionFrames[selectedFrameID].Settings.IsmMode = false
+            SuggestionFrames[selectedFrameID].Settings.AshMode = false
+            SuggestionFrames[selectedFrameID].Settings.OlogyMode = false
+        end
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Display_Section:addToggle("Random Order", true, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.RandomOrder = value
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Display_Section:addSlider("Max Suggestions", 1, 30, IsMobile and 8 or 10, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.MaxSuggestions = value
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+-- Filter Settings
+Sections.Filter_Section:addToggle("Show Used Words", true, function(value)
+    if SuggestionFrames[selectedFrameID] then
+        SuggestionFrames[selectedFrameID].Settings.ShowUsedWords = value
+        SuggestionFrames[selectedFrameID].Update()
+    end
+end)
+
+Sections.Filter_Section:addButton("Clear Used Words", function()
+    UsedWords = {}
+    for _, frame in pairs(SuggestionFrames) do
+        frame.Update()
+    end
+end)
+
+-- Actions
+Sections.Actions_Section:addButton("Refresh All Frames", function()
+    for _, frame in pairs(SuggestionFrames) do
+        frame.Update()
+    end
+end)
+
+Sections.Actions_Section:addButton("Close Settings", function()
+    Venyx:toggle()
+end)
+
+Venyx:SelectPage(Venyx.pages[1], true)
+
+-- Auto-update loop
+task.spawn(function()
+    local lastLetters = ""
+    while true do
+        task.wait(0.2)
+        local currentLetters = GetLetters()
+        if currentLetters ~= lastLetters then
+            lastLetters = currentLetters
+            for _, frame in pairs(SuggestionFrames) do
+                if frame.Settings.ShowSuggestions then
+                    frame.Update()
+                end
+            end
+        end
+    end
+end)
+
+-- Game event listeners
+Games:WaitForChild("RegisterGame").OnClientEvent:Connect(function(int)
+    GameID = int
+    UsedWords = {}
+    for _, frame in pairs(SuggestionFrames) do
+        frame.Update()
+    end
+end)
+
+print("[Word Suggester] Loaded successfully! Device: " .. (IsMobile and "Mobile" or "Desktop"))

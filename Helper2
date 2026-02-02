@@ -7,25 +7,6 @@ local ASH_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b
 local OLOGY_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/LOGY_Practice"
 local EXPERT_DICTIONARY_URL = "https://raw.githubusercontent.com/S0APPY378/0x9af13b/refs/heads/main/EXPERT_Practice"
 
--- Mobile Detection
-local UserInputService = game:GetService("UserInputService")
-local IsMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-print("Device Type: " .. (IsMobile and "Mobile" or "Desktop"))
-
--- UI Scale based on device
-local UIScale = {
-    FrameWidth = IsMobile and 180 or 250,
-    FrameHeight = IsMobile and 300 or 400,
-    TitleHeight = IsMobile and 28 or 35,
-    TitleFontSize = IsMobile and 13 or 16,
-    PromptFontSize = IsMobile and 11 or 14,
-    WordFontSize = IsMobile and 11 or 14,
-    WordHeight = IsMobile and 20 or 25,
-    Padding = IsMobile and 3 or 5,
-    ScrollBarThickness = IsMobile and 4 or 6,
-    CornerRadius = IsMobile and 6 or 8
-}
-
 -- [Dictionary loading code - keeping original implementation]
 local WordIndex = {}
 local HyphenIndex = {}
@@ -152,6 +133,7 @@ print("Loaded: " .. #AllWords .. " words | " .. #HyphenWords .. " hyphenated | "
 -- Services
 local Player = game:GetService("Players").LocalPlayer
 local Games = game:GetService("ReplicatedStorage"):WaitForChild("Network"):WaitForChild("Games")
+local UserInputService = game:GetService("UserInputService")
 local GameID = "-1"
 local UsedWords = {}
 
@@ -268,13 +250,13 @@ local function FindWords(letters, settings)
     return limited
 end
 
--- Create a new draggable suggestion frame
+-- Create a new COMPACT suggestion frame for mobile
 local function CreateSuggestionFrame(frameID, initialPosition)
     local frameData = {
         ID = frameID,
         Settings = {
             ShowSuggestions = true,
-            MaxSuggestions = IsMobile and 8 or 10,
+            MaxSuggestions = 6,  -- Reduced for mobile
             SortByLength = false,
             RandomOrder = true,
             ShowUsedWords = true,
@@ -289,28 +271,17 @@ local function CreateSuggestionFrame(frameID, initialPosition)
         }
     }
     
-    -- Calculate position for mobile (centered, stacked vertically)
-    local defaultPosition
-    if IsMobile then
-        -- Center horizontally, stack vertically with spacing
-        local yOffset = 0.15 + ((frameID - 1) * 0.35)
-        defaultPosition = UDim2.new(0.5, -UIScale.FrameWidth / 2, yOffset, 0)
-    else
-        -- Desktop: original horizontal layout
-        defaultPosition = UDim2.new(0.02 + (frameID - 1) * 0.18, 0, 0.3, 0)
-    end
-    
-    -- Create main frame
+    -- Create main frame - ULTRA COMPACT
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "SuggestionFrame_" .. frameID
-    MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     MainFrame.BorderSizePixel = 0
-    MainFrame.Position = initialPosition or defaultPosition
-    MainFrame.Size = UDim2.new(0, UIScale.FrameWidth, 0, UIScale.FrameHeight)
+    MainFrame.Position = initialPosition or UDim2.new(0.02, 0, 0.1, 0)
+    MainFrame.Size = UDim2.new(0, 140, 0, 220)  -- Ultra compact: 140x220
     MainFrame.Parent = Player.PlayerGui:WaitForChild("WordSuggester")
     
     local UICorner = Instance.new("UICorner")
-    UICorner.CornerRadius = UDim.new(0, UIScale.CornerRadius)
+    UICorner.CornerRadius = UDim.new(0, 6)
     UICorner.Parent = MainFrame
     
     -- Make draggable
@@ -343,37 +314,36 @@ local function CreateSuggestionFrame(frameID, initialPosition)
         end
     end)
     
-    -- Title bar
+    -- Ultra compact title bar
     local Title = Instance.new("TextLabel")
     Title.Name = "Title"
-    Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    Title.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     Title.BorderSizePixel = 0
-    Title.Size = UDim2.new(1, 0, 0, UIScale.TitleHeight)
+    Title.Size = UDim2.new(1, 0, 0, 20)  -- Ultra compact: 20px
     Title.Font = Enum.Font.GothamBold
-    Title.Text = IsMobile and "Sug #" .. frameID or "Suggestions #" .. frameID
+    Title.Text = "#" .. frameID
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = UIScale.TitleFontSize
+    Title.TextSize = 10  -- Very small text
     Title.Parent = MainFrame
     
     local TitleCorner = Instance.new("UICorner")
-    TitleCorner.CornerRadius = UDim.new(0, UIScale.CornerRadius)
+    TitleCorner.CornerRadius = UDim.new(0, 6)
     TitleCorner.Parent = Title
     
-    -- Close button
-    local closeButtonSize = IsMobile and 20 or 25
+    -- Ultra compact close button
     local CloseButton = Instance.new("TextButton")
     CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
     CloseButton.BorderSizePixel = 0
-    CloseButton.Position = UDim2.new(1, -(closeButtonSize + 3), 0, (UIScale.TitleHeight - closeButtonSize) / 2)
-    CloseButton.Size = UDim2.new(0, closeButtonSize, 0, closeButtonSize)
+    CloseButton.Position = UDim2.new(1, -18, 0, 2)
+    CloseButton.Size = UDim2.new(0, 16, 0, 16)  -- Ultra small: 16x16
     CloseButton.Font = Enum.Font.GothamBold
     CloseButton.Text = "X"
     CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseButton.TextSize = IsMobile and 11 or 14
+    CloseButton.TextSize = 9
     CloseButton.Parent = Title
     
     local CloseCorner = Instance.new("UICorner")
-    CloseCorner.CornerRadius = UDim.new(0, 4)
+    CloseCorner.CornerRadius = UDim.new(0, 3)
     CloseCorner.Parent = CloseButton
     
     CloseButton.MouseButton1Click:Connect(function()
@@ -381,47 +351,44 @@ local function CreateSuggestionFrame(frameID, initialPosition)
         SuggestionFrames[frameID] = nil
     end)
     
-    -- Prompt label
-    local promptYOffset = UIScale.TitleHeight + (IsMobile and 3 or 5)
+    -- Ultra compact prompt label
     local PromptLabel = Instance.new("TextLabel")
     PromptLabel.BackgroundTransparency = 1
-    PromptLabel.Position = UDim2.new(0, IsMobile and 5 or 10, 0, promptYOffset)
-    PromptLabel.Size = UDim2.new(1, IsMobile and -10 or -20, 0, IsMobile and 18 or 25)
+    PromptLabel.Position = UDim2.new(0, 4, 0, 22)
+    PromptLabel.Size = UDim2.new(1, -8, 0, 14)
     PromptLabel.Font = Enum.Font.GothamBold
-    PromptLabel.Text = "Letters: --"
+    PromptLabel.Text = "--"
     PromptLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-    PromptLabel.TextSize = UIScale.PromptFontSize
+    PromptLabel.TextSize = 9
     PromptLabel.TextXAlignment = Enum.TextXAlignment.Left
     PromptLabel.Parent = MainFrame
     
-    -- Special mode label
-    local modeYOffset = promptYOffset + (IsMobile and 18 or 22)
+    -- Ultra compact special mode label
     local SpecialModeLabel = Instance.new("TextLabel")
     SpecialModeLabel.BackgroundTransparency = 1
-    SpecialModeLabel.Position = UDim2.new(0, IsMobile and 5 or 10, 0, modeYOffset)
-    SpecialModeLabel.Size = UDim2.new(1, IsMobile and -10 or -20, 0, IsMobile and 15 or 20)
+    SpecialModeLabel.Position = UDim2.new(0, 4, 0, 36)
+    SpecialModeLabel.Size = UDim2.new(1, -8, 0, 10)
     SpecialModeLabel.Font = Enum.Font.Gotham
     SpecialModeLabel.Text = ""
     SpecialModeLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
-    SpecialModeLabel.TextSize = IsMobile and 8 or 10
+    SpecialModeLabel.TextSize = 8
     SpecialModeLabel.TextXAlignment = Enum.TextXAlignment.Left
     SpecialModeLabel.Visible = false
     SpecialModeLabel.Parent = MainFrame
     
-    -- Scroll frame for words
-    local scrollYOffset = modeYOffset + (IsMobile and 18 : 23)
+    -- Ultra compact scroll frame
     local ScrollFrame = Instance.new("ScrollingFrame")
     ScrollFrame.BackgroundTransparency = 1
-    ScrollFrame.Position = UDim2.new(0, UIScale.Padding, 0, scrollYOffset)
-    ScrollFrame.Size = UDim2.new(1, -UIScale.Padding * 2, 1, -(scrollYOffset + UIScale.Padding))
+    ScrollFrame.Position = UDim2.new(0, 3, 0, 48)
+    ScrollFrame.Size = UDim2.new(1, -6, 1, -50)
     ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-    ScrollFrame.ScrollBarThickness = UIScale.ScrollBarThickness
+    ScrollFrame.ScrollBarThickness = 3
     ScrollFrame.BorderSizePixel = 0
     ScrollFrame.Parent = MainFrame
     
     local ListLayout = Instance.new("UIListLayout")
     ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ListLayout.Padding = UDim.new(0, IsMobile and 2 or 3)
+    ListLayout.Padding = UDim.new(0, 1)
     ListLayout.Parent = ScrollFrame
     
     frameData.MainFrame = MainFrame
@@ -439,7 +406,7 @@ local function CreateSuggestionFrame(frameID, initialPosition)
         end
         
         local letters = GetLetters()
-        PromptLabel.Text = (IsMobile and "L: " or "Letters: ") .. (letters ~= "" and string.upper(letters) or "--")
+        PromptLabel.Text = letters ~= "" and string.upper(letters) or "--"
         
         if not frameData.Settings.ShowSuggestions or letters == "" then
             SpecialModeLabel.Visible = false
@@ -451,31 +418,31 @@ local function CreateSuggestionFrame(frameID, initialPosition)
         -- Update special mode label
         if frameData.Settings.ExpertMode then
             SpecialModeLabel.Visible = true
-            SpecialModeLabel.Text = IsMobile and "Expert" or "Expert Mode"
+            SpecialModeLabel.Text = "Expert"
             SpecialModeLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
         elseif frameData.Settings.HyphenMode then
             SpecialModeLabel.Visible = true
-            SpecialModeLabel.Text = IsMobile and "Hyphen" or "Hyphen Mode"
+            SpecialModeLabel.Text = "Hyphen"
             SpecialModeLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
         elseif frameData.Settings.PhobiaMode then
             SpecialModeLabel.Visible = true
-            SpecialModeLabel.Text = IsMobile and "Phobia" or "Phobia Mode"
+            SpecialModeLabel.Text = "Phobia"
             SpecialModeLabel.TextColor3 = Color3.fromRGB(255, 150, 200)
         elseif frameData.Settings.IsmMode then
             SpecialModeLabel.Visible = true
-            SpecialModeLabel.Text = IsMobile and "Ism" or "Ism Mode"
+            SpecialModeLabel.Text = "Ism"
             SpecialModeLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
         elseif frameData.Settings.AshMode then
             SpecialModeLabel.Visible = true
-            SpecialModeLabel.Text = IsMobile and "Ash" or "Ash Mode"
+            SpecialModeLabel.Text = "Ash"
             SpecialModeLabel.TextColor3 = Color3.fromRGB(255, 180, 100)
         elseif frameData.Settings.OlogyMode then
             SpecialModeLabel.Visible = true
-            SpecialModeLabel.Text = IsMobile and "Ology" or "Ology Mode"
+            SpecialModeLabel.Text = "Ology"
             SpecialModeLabel.TextColor3 = Color3.fromRGB(150, 255, 200)
         elseif frameData.Settings.ShortWordsMode then
             SpecialModeLabel.Visible = true
-            SpecialModeLabel.Text = IsMobile and "Short" or "Short Words"
+            SpecialModeLabel.Text = "Short"
             SpecialModeLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
         else
             SpecialModeLabel.Visible = false
@@ -484,11 +451,11 @@ local function CreateSuggestionFrame(frameID, initialPosition)
         if #words == 0 then
             local noWords = Instance.new("TextLabel")
             noWords.BackgroundTransparency = 1
-            noWords.Size = UDim2.new(1, -10, 0, UIScale.WordHeight)
+            noWords.Size = UDim2.new(1, -6, 0, 14)
             noWords.Font = Enum.Font.Gotham
-            noWords.Text = "No words found"
+            noWords.Text = "None"
             noWords.TextColor3 = Color3.fromRGB(150, 150, 150)
-            noWords.TextSize = UIScale.WordFontSize - 2
+            noWords.TextSize = 8
             noWords.TextXAlignment = Enum.TextXAlignment.Left
             noWords.Parent = ScrollFrame
             return
@@ -497,44 +464,44 @@ local function CreateSuggestionFrame(frameID, initialPosition)
         for i, wordData in ipairs(words) do
             local wordLabel = Instance.new("TextLabel")
             
-            local bgColor = Color3.fromRGB(40, 40, 40)
+            local bgColor = Color3.fromRGB(35, 35, 35)
             if wordData.used then
-                bgColor = Color3.fromRGB(60, 40, 40)
+                bgColor = Color3.fromRGB(55, 35, 35)
             elseif frameData.Settings.ExpertMode and wordData.isExpert then
-                bgColor = Color3.fromRGB(60, 55, 30)
+                bgColor = Color3.fromRGB(55, 50, 25)
             elseif frameData.Settings.HyphenMode and wordData.hasHyphen then
-                bgColor = Color3.fromRGB(40, 60, 50)
+                bgColor = Color3.fromRGB(35, 55, 45)
             elseif frameData.Settings.PhobiaMode and wordData.isPhobia then
-                bgColor = Color3.fromRGB(60, 40, 55)
+                bgColor = Color3.fromRGB(55, 35, 50)
             elseif frameData.Settings.IsmMode and wordData.isIsm then
-                bgColor = Color3.fromRGB(40, 50, 60)
+                bgColor = Color3.fromRGB(35, 45, 55)
             elseif frameData.Settings.AshMode and wordData.isAsh then
-                bgColor = Color3.fromRGB(60, 50, 40)
+                bgColor = Color3.fromRGB(55, 45, 35)
             elseif frameData.Settings.OlogyMode and wordData.isOlogy then
-                bgColor = Color3.fromRGB(40, 60, 55)
+                bgColor = Color3.fromRGB(35, 55, 50)
             end
             
             wordLabel.BackgroundColor3 = bgColor
             wordLabel.BorderSizePixel = 0
-            wordLabel.Size = UDim2.new(1, -10, 0, UIScale.WordHeight)
+            wordLabel.Size = UDim2.new(1, -6, 0, 16)  -- Ultra compact: 16px
             wordLabel.Font = Enum.Font.GothamMedium
-            wordLabel.Text = string.upper(wordData.word) .. " (" .. wordData.length .. ")"
+            wordLabel.Text = string.upper(wordData.word) .. "(" .. wordData.length .. ")"
             wordLabel.TextColor3 = wordData.used and Color3.fromRGB(150, 150, 150) or Color3.fromRGB(255, 255, 255)
-            wordLabel.TextSize = UIScale.WordFontSize
+            wordLabel.TextSize = 9  -- Very small text
             wordLabel.TextXAlignment = Enum.TextXAlignment.Left
             wordLabel.TextTruncate = Enum.TextTruncate.AtEnd
             wordLabel.Parent = ScrollFrame
             
             local padding = Instance.new("UIPadding")
-            padding.PaddingLeft = UDim.new(0, IsMobile and 5 or 8)
+            padding.PaddingLeft = UDim.new(0, 4)
             padding.Parent = wordLabel
             
             local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 4)
+            corner.CornerRadius = UDim.new(0, 2)
             corner.Parent = wordLabel
         end
         
-        ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 5)
+        ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 3)
     end
     
     return frameData
@@ -552,23 +519,23 @@ local firstFrame = CreateSuggestionFrame(NextFrameID)
 SuggestionFrames[NextFrameID] = firstFrame
 NextFrameID = NextFrameID + 1
 
--- Settings GUI
+-- COMPACT Settings GUI
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Pstrw/Reuploaded-Librarys/main/Venyx/source.lua"))()
-local Venyx = Library.new("jengu.lol   I   Word Suggester " .. (IsMobile and "(Mobile)" or "(Desktop)"), 5013109572)
+local Venyx = Library.new("Word Suggester Mobile", 5013109572)
 
 local Tabs = {Main = Venyx:addPage("Main", 5012544693)}
 local Sections = {
-    Frame_Section = Tabs.Main:addSection("Frame Management"),
-    Display_Section = Tabs.Main:addSection("Frame Settings"),
-    Filter_Section = Tabs.Main:addSection("Filter Settings"),
+    Frame_Section = Tabs.Main:addSection("Frames"),
+    Display_Section = Tabs.Main:addSection("Settings"),
+    Filter_Section = Tabs.Main:addSection("Filters"),
     Actions_Section = Tabs.Main:addSection("Actions")
 }
 
 local selectedFrameID = 1
 
 -- Frame Management
-Sections.Frame_Section:addButton("Create New Frame", function()
-    local newFrame = CreateSuggestionFrame(NextFrameID)
+Sections.Frame_Section:addButton("New Frame", function()
+    local newFrame = CreateSuggestionFrame(NextFrameID, UDim2.new(0.02 + (NextFrameID - 1) * 0.12, 0, 0.1, 0))
     SuggestionFrames[NextFrameID] = newFrame
     print("Created frame #" .. NextFrameID)
     NextFrameID = NextFrameID + 1
@@ -677,7 +644,7 @@ Sections.Display_Section:addToggle("Ology Mode", false, function(value)
     end
 end)
 
-Sections.Display_Section:addToggle("Short Words Mode", false, function(value)
+Sections.Display_Section:addToggle("Short Words", false, function(value)
     if SuggestionFrames[selectedFrameID] then
         SuggestionFrames[selectedFrameID].Settings.ShortWordsMode = value
         if value then
@@ -699,7 +666,7 @@ Sections.Display_Section:addToggle("Random Order", true, function(value)
     end
 end)
 
-Sections.Display_Section:addSlider("Max Suggestions", 1, 30, IsMobile and 8 or 10, function(value)
+Sections.Display_Section:addSlider("Max Words", 1, 12, 6, function(value)
     if SuggestionFrames[selectedFrameID] then
         SuggestionFrames[selectedFrameID].Settings.MaxSuggestions = value
         SuggestionFrames[selectedFrameID].Update()
@@ -707,14 +674,14 @@ Sections.Display_Section:addSlider("Max Suggestions", 1, 30, IsMobile and 8 or 1
 end)
 
 -- Filter Settings
-Sections.Filter_Section:addToggle("Show Used Words", true, function(value)
+Sections.Filter_Section:addToggle("Show Used", true, function(value)
     if SuggestionFrames[selectedFrameID] then
         SuggestionFrames[selectedFrameID].Settings.ShowUsedWords = value
         SuggestionFrames[selectedFrameID].Update()
     end
 end)
 
-Sections.Filter_Section:addButton("Clear Used Words", function()
+Sections.Filter_Section:addButton("Clear Used", function()
     UsedWords = {}
     for _, frame in pairs(SuggestionFrames) do
         frame.Update()
@@ -722,14 +689,10 @@ Sections.Filter_Section:addButton("Clear Used Words", function()
 end)
 
 -- Actions
-Sections.Actions_Section:addButton("Refresh All Frames", function()
+Sections.Actions_Section:addButton("Refresh All", function()
     for _, frame in pairs(SuggestionFrames) do
         frame.Update()
     end
-end)
-
-Sections.Actions_Section:addButton("Close Settings", function()
-    Venyx:toggle()
 end)
 
 Venyx:SelectPage(Venyx.pages[1], true)
@@ -759,5 +722,3 @@ Games:WaitForChild("RegisterGame").OnClientEvent:Connect(function(int)
         frame.Update()
     end
 end)
-
-print("[Word Suggester] Loaded successfully! Device: " .. (IsMobile and "Mobile" or "Desktop"))

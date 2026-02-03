@@ -204,6 +204,17 @@ local function FindWords(letters, settings)
         candidates = shuffled
     end
     
+    -- Pre-sort candidates by length if in Short Words Mode
+    -- This ensures we check the shortest words first
+    if settings.ShortWordsMode and not settings.RandomOrder then
+        local tempCandidates = {}
+        for _, word in ipairs(candidates) do
+            table.insert(tempCandidates, word)
+        end
+        table.sort(tempCandidates, function(a, b) return #a < #b end)
+        candidates = tempCandidates
+    end
+    
     for _, word in ipairs(candidates) do
         if #results >= settings.MaxSuggestions * 3 then break end
         
@@ -231,8 +242,14 @@ local function FindWords(letters, settings)
         end
     end
     
+    -- Sort results
     if settings.ShortWordsMode then
-        table.sort(results, function(a, b) return a.length < b.length end)
+        table.sort(results, function(a, b) 
+            if a.length == b.length then 
+                return a.word < b.word 
+            end
+            return a.length < b.length 
+        end)
     elseif settings.SortByLength then
         table.sort(results, function(a, b)
             if a.length == b.length then return a.word < b.word end

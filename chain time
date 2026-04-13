@@ -1,0 +1,173 @@
+--// SERVICES
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+--// GUI SETUP
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "InfoDisplayGUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+screenGui.DisplayOrder = 5
+
+--// MAIN FRAME
+local mainFrame = Instance.new("Frame")
+mainFrame.Parent = screenGui
+mainFrame.Size = UDim2.new(0, 260, 0, 170)
+mainFrame.Position = UDim2.new(0.5, -130, 0.5, -85)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 40)
+mainFrame.BorderSizePixel = 0
+
+-- Rounded corners
+local corner = Instance.new("UICorner", mainFrame)
+corner.CornerRadius = UDim.new(0, 8)
+
+--// TOP BAR (DRAG AREA)
+local topBar = Instance.new("Frame")
+topBar.Parent = mainFrame
+topBar.Size = UDim2.new(1, 0, 0, 28)
+topBar.BackgroundColor3 = Color3.fromRGB(25, 25, 70)
+topBar.BorderSizePixel = 0
+
+Instance.new("UICorner", topBar).CornerRadius = UDim.new(0, 8)
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Parent = topBar
+title.Size = UDim2.new(1, -30, 1, 0)
+title.Position = UDim2.new(0, 8, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Game Info"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextColor3 = Color3.new(1,1,1)
+
+-- Close Button
+local close = Instance.new("TextButton")
+close.Parent = topBar
+close.Size = UDim2.new(0, 24, 0, 24)
+close.Position = UDim2.new(1, -26, 0, 2)
+close.Text = "X"
+close.Font = Enum.Font.GothamBold
+close.TextSize = 14
+close.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+close.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", close)
+
+close.MouseButton1Click:Connect(function()
+	screenGui:Destroy()
+end)
+
+--// CONTENT HOLDER
+local content = Instance.new("Frame")
+content.Parent = mainFrame
+content.Position = UDim2.new(0, 0, 0, 30)
+content.Size = UDim2.new(1, 0, 1, -30)
+content.BackgroundTransparency = 1
+
+-- Layout
+local layout = Instance.new("UIListLayout", content)
+layout.Padding = UDim.new(0, 6)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Padding
+Instance.new("UIPadding", content).PaddingLeft = UDim.new(0, 8)
+
+--// FUNCTION TO CREATE ROW
+local function createRow(labelText)
+	local holder = Instance.new("Frame")
+	holder.Size = UDim2.new(1, -10, 0, 30)
+	holder.BackgroundTransparency = 1
+
+	local label = Instance.new("TextLabel")
+	label.Parent = holder
+	label.Size = UDim2.new(0.6, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = labelText
+	label.Font = Enum.Font.GothamBold
+	label.TextSize = 14
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextColor3 = Color3.new(1,1,1)
+
+	local value = Instance.new("TextLabel")
+	value.Parent = holder
+	value.Size = UDim2.new(0.4, -5, 1, 0)
+	value.Position = UDim2.new(0.6, 0, 0, 0)
+	value.BackgroundTransparency = 1
+	value.Text = "..."
+	value.Font = Enum.Font.Gotham
+	value.TextSize = 14
+	value.TextXAlignment = Enum.TextXAlignment.Right
+	value.TextColor3 = Color3.fromRGB(180,180,180)
+
+	holder.Parent = content
+	return value
+end
+
+--// CREATE ROWS
+local roundTimeLabel = createRow("RoundTime")
+local intermissionLabel = createRow("Intermission")
+local powerLabel = createRow("Power")
+
+-- Credits
+local credits = Instance.new("TextLabel")
+credits.Parent = content
+credits.Size = UDim2.new(1, -10, 0, 20)
+credits.BackgroundTransparency = 1
+credits.Text = "Gui by Nëonicf"
+credits.Font = Enum.Font.Gotham
+credits.TextSize = 12
+credits.TextColor3 = Color3.fromRGB(150,150,150)
+credits.TextXAlignment = Enum.TextXAlignment.Center
+
+--// DRAG SYSTEM (FIXED)
+local dragging = false
+local dragStart, startPos
+
+topBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = mainFrame.Position
+	end
+end)
+
+topBar.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		mainFrame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+--// VALUE TRACKING
+local valuesFolder = workspace:WaitForChild("GameStuff"):WaitForChild("Values")
+
+local function bindAttribute(attr, label)
+	local function update()
+		local val = valuesFolder:GetAttribute(attr)
+		if typeof(val) == "number" then
+			label.Text = tostring(val)
+		else
+			label.Text = "N/A"
+		end
+	end
+	
+	valuesFolder:GetAttributeChangedSignal(attr):Connect(update)
+	update()
+end
+
+bindAttribute("RoundTime", roundTimeLabel)
+bindAttribute("IntermissionTime", intermissionLabel)
+bindAttribute("Power", powerLabel)

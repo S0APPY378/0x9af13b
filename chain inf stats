@@ -4,6 +4,16 @@ local player = game.Players.LocalPlayer
 local lastCombatStamina = 100
 local regenBoost = 0
 
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+-- Hide once for mobile
+if isMobile then
+    local gui = player.PlayerGui:WaitForChild("Ingame")
+    local mech = gui:WaitForChild("MechanicsFrame")
+    mech.QTEToma.Visible = false
+    mech.QTEToma.ImageButton.PC.Visible = false
+end
+
 RunService.RenderStepped:Connect(function(dt)
     local char = player.Character
     if not char then return end
@@ -13,7 +23,6 @@ RunService.RenderStepped:Connect(function(dt)
     local combatStamina = stats:FindFirstChild("CombatStamina")
     local clash = stats:FindFirstChild("ClashStrength")
 
-    -- Keep these maxed (unchanged)
     if stamina then
         stamina.Value = 100
     end
@@ -21,14 +30,11 @@ RunService.RenderStepped:Connect(function(dt)
         clash.Value = 100
     end
 
-    -- Combat stamina logic
     if combatStamina then
         local current = combatStamina.Value
-        -- Detect decrease → boost regen
         if current < lastCombatStamina then
             regenBoost = 5
         end
-        -- Gradual regen
         if current < 100 then
             local regenSpeed = 10 + regenBoost
             combatStamina.Value = math.clamp(current + regenSpeed * dt, 0, 100)
@@ -37,14 +43,15 @@ RunService.RenderStepped:Connect(function(dt)
         lastCombatStamina = combatStamina.Value
     end
 
-    -- GUI stuff
-    local gui = player.PlayerGui:FindFirstChild("Ingame")
-    if gui then
-        local mech = gui:FindFirstChild("MechanicsFrame")
-        if mech then
-            local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-            mech.QTEToma.Visible = not isMobile
-            mech.QTEToma.ImageButton.PC.Visible = not isMobile
+    -- Keep QTEToma visible on PC every frame
+    if not isMobile then
+        local gui = player.PlayerGui:FindFirstChild("Ingame")
+        if gui then
+            local mech = gui:FindFirstChild("MechanicsFrame")
+            if mech then
+                mech.QTEToma.Visible = true
+                mech.QTEToma.ImageButton.PC.Visible = true
+            end
         end
     end
 end)

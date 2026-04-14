@@ -18,7 +18,6 @@ mainFrame.Position = UDim2.new(0.5, -130, 0.5, -85)
 mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 40)
 mainFrame.BorderSizePixel = 0
 
--- Rounded corners
 local corner = Instance.new("UICorner", mainFrame)
 corner.CornerRadius = UDim.new(0, 8)
 
@@ -31,7 +30,6 @@ topBar.BorderSizePixel = 0
 
 Instance.new("UICorner", topBar).CornerRadius = UDim.new(0, 8)
 
--- Title
 local title = Instance.new("TextLabel")
 title.Parent = topBar
 title.Size = UDim2.new(1, -30, 1, 0)
@@ -43,7 +41,6 @@ title.TextSize = 14
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextColor3 = Color3.new(1,1,1)
 
--- Close Button
 local close = Instance.new("TextButton")
 close.Parent = topBar
 close.Size = UDim2.new(0, 24, 0, 24)
@@ -66,12 +63,10 @@ content.Position = UDim2.new(0, 0, 0, 30)
 content.Size = UDim2.new(1, 0, 1, -30)
 content.BackgroundTransparency = 1
 
--- Layout
 local layout = Instance.new("UIListLayout", content)
 layout.Padding = UDim.new(0, 6)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Padding
 Instance.new("UIPadding", content).PaddingLeft = UDim.new(0, 8)
 
 --// FUNCTION TO CREATE ROW
@@ -110,7 +105,6 @@ local roundTimeLabel = createRow("RoundTime")
 local intermissionLabel = createRow("Intermission")
 local powerLabel = createRow("Power")
 
--- Credits
 local credits = Instance.new("TextLabel")
 credits.Parent = content
 credits.Size = UDim2.new(1, -10, 0, 20)
@@ -121,27 +115,34 @@ credits.TextSize = 12
 credits.TextColor3 = Color3.fromRGB(150,150,150)
 credits.TextXAlignment = Enum.TextXAlignment.Center
 
---// DRAG SYSTEM (FIXED)
+--// DRAG SYSTEM (MOBILE + DESKTOP FIXED)
 local dragging = false
 local dragStart, startPos
 
+local function getInputPosition(input)
+	return input.Position
+end
+
 topBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
 		dragging = true
-		dragStart = input.Position
+		dragStart = getInputPosition(input)
 		startPos = mainFrame.Position
 	end
 end)
 
 topBar.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
 		dragging = false
 	end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Position - dragStart
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = getInputPosition(input) - dragStart
 		mainFrame.Position = UDim2.new(
 			startPos.X.Scale,
 			startPos.X.Offset + delta.X,
@@ -163,7 +164,7 @@ local function bindAttribute(attr, label)
 			label.Text = "N/A"
 		end
 	end
-	
+
 	valuesFolder:GetAttributeChangedSignal(attr):Connect(update)
 	update()
 end

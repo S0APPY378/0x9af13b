@@ -1,225 +1,57 @@
---// SERVICES
-local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local player = Players.LocalPlayer
+local player = game.Players.LocalPlayer
+local lastCombatStamina = 100
+local regenBoost = 0
 
---// GUI SETUP
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "InfoDisplayGUI"
-screenGui.Parent = player:WaitForChild("PlayerGui")
-screenGui.ResetOnSpawn = false
-screenGui.DisplayOrder = 5
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
---// MAIN FRAME
-local mainFrame = Instance.new("Frame")
-mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, 260, 0, 170)
-mainFrame.Position = UDim2.new(0.5, -130, 0.5, -85)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 40)
-mainFrame.BorderSizePixel = 0
-
-local corner = Instance.new("UICorner", mainFrame)
-corner.CornerRadius = UDim.new(0, 8)
-
---// TOP BAR (DRAG AREA)
-local topBar = Instance.new("Frame")
-topBar.Parent = mainFrame
-topBar.Size = UDim2.new(1, 0, 0, 28)
-topBar.BackgroundColor3 = Color3.fromRGB(25, 25, 70)
-topBar.BorderSizePixel = 0
-
-Instance.new("UICorner", topBar).CornerRadius = UDim.new(0, 8)
-
-local title = Instance.new("TextLabel")
-title.Parent = topBar
-title.Size = UDim2.new(1, -30, 1, 0)
-title.Position = UDim2.new(0, 8, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "Game Info"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextColor3 = Color3.new(1,1,1)
-
-local close = Instance.new("TextButton")
-close.Parent = topBar
-close.Size = UDim2.new(0, 24, 0, 24)
-close.Position = UDim2.new(1, -26, 0, 2)
-close.Text = "X"
-close.Font = Enum.Font.GothamBold
-close.TextSize = 14
-close.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-close.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", close)
-
-close.MouseButton1Click:Connect(function()
-	screenGui:Destroy()
-end)
-
---// CONTENT HOLDER
-local content = Instance.new("Frame")
-content.Parent = mainFrame
-content.Position = UDim2.new(0, 0, 0, 30)
-content.Size = UDim2.new(1, 0, 1, -30)
-content.BackgroundTransparency = 1
-
-local layout = Instance.new("UIListLayout", content)
-layout.Padding = UDim.new(0, 6)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-
-Instance.new("UIPadding", content).PaddingLeft = UDim.new(0, 8)
-
---// FUNCTION TO CREATE ROW
-local function createRow(labelText)
-	local holder = Instance.new("Frame")
-	holder.Size = UDim2.new(1, -10, 0, 30)
-	holder.BackgroundTransparency = 1
-
-	local label = Instance.new("TextLabel")
-	label.Parent = holder
-	label.Size = UDim2.new(0.6, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = labelText
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 14
-	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.TextColor3 = Color3.new(1,1,1)
-
-	local value = Instance.new("TextLabel")
-	value.Parent = holder
-	value.Size = UDim2.new(0.4, -5, 1, 0)
-	value.Position = UDim2.new(0.6, 0, 0, 0)
-	value.BackgroundTransparency = 1
-	value.Text = "..."
-	value.Font = Enum.Font.Gotham
-	value.TextSize = 14
-	value.TextXAlignment = Enum.TextXAlignment.Right
-	value.TextColor3 = Color3.fromRGB(180,180,180)
-
-	holder.Parent = content
-	return value
+-- Hide once for mobile
+if isMobile then
+    local gui = player.PlayerGui:WaitForChild("Ingame")
+    local mech = gui:WaitForChild("MechanicsFrame")
+    mech.QTEToma.Visible = false
+    mech.QTEToma.ImageButton.PC.Visible = false
 end
 
---// CREATE ROWS
-local roundTimeLabel = createRow("RoundTime")
-local intermissionLabel = createRow("Intermission")
-local powerLabel = createRow("Power")
+RunService.RenderStepped:Connect(function(dt)
+    local char = player.Character
+    if not char then return end
+    local stats = char:FindFirstChild("Stats")
+    if not stats then return end
+    local stamina = stats:FindFirstChild("Stamina")
+    local combatStamina = stats:FindFirstChild("CombatStamina")
+    local clash = stats:FindFirstChild("ClashStrength")
 
-local credits = Instance.new("TextLabel")
-credits.Parent = content
-credits.Size = UDim2.new(1, -10, 0, 20)
-credits.BackgroundTransparency = 1
-credits.Text = "Gui by Nëonicf"
-credits.Font = Enum.Font.Gotham
-credits.TextSize = 12
-credits.TextColor3 = Color3.fromRGB(150,150,150)
-credits.TextXAlignment = Enum.TextXAlignment.Center
+    if stamina then
+        stamina.Value = 100
+    end
+    if clash then
+        clash.Value = 100
+    end
 
---// RESIZE HANDLE (bottom-right corner)
-local resizeHandle = Instance.new("TextButton")
-resizeHandle.Parent = mainFrame
-resizeHandle.Size = UDim2.new(0, 18, 0, 18)
-resizeHandle.Position = UDim2.new(1, -18, 1, -18)
-resizeHandle.BackgroundColor3 = Color3.fromRGB(60, 60, 100)
-resizeHandle.Text = ""
-resizeHandle.BorderSizePixel = 0
-resizeHandle.ZIndex = 10
-Instance.new("UICorner", resizeHandle).CornerRadius = UDim.new(0, 4)
+    if combatStamina then
+        local current = combatStamina.Value
+        if current < lastCombatStamina then
+            regenBoost = 5
+        end
+        if current < 100 then
+            local regenSpeed = 10 + regenBoost
+            combatStamina.Value = math.clamp(current + regenSpeed * dt, 0, 100)
+            regenBoost = math.max(regenBoost - (5 * dt), 0)
+        end
+        lastCombatStamina = combatStamina.Value
+    end
 
--- Resize grip dots for visual indicator
-local gripLabel = Instance.new("TextLabel")
-gripLabel.Parent = resizeHandle
-gripLabel.Size = UDim2.new(1, 0, 1, 0)
-gripLabel.BackgroundTransparency = 1
-gripLabel.Text = "⠿"
-gripLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
-gripLabel.TextSize = 14
-gripLabel.Font = Enum.Font.Gotham
-
---// MIN SIZE
-local MIN_WIDTH = 180
-local MIN_HEIGHT = 130
-
---// DRAG SYSTEM (MOBILE + DESKTOP)
-local dragging = false
-local dragStart, startPos
-
-topBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-		or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = mainFrame.Position
-	end
+    -- Keep QTEToma visible on PC every frame
+    if not isMobile then
+        local gui = player.PlayerGui:FindFirstChild("Ingame")
+        if gui then
+            local mech = gui:FindFirstChild("MechanicsFrame")
+            if mech then
+                mech.QTEToma.Visible = true
+                mech.QTEToma.ImageButton.PC.Visible = true
+            end
+        end
+    end
 end)
-
-topBar.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-		or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = false
-	end
-end)
-
---// RESIZE SYSTEM (MOBILE + DESKTOP)
-local resizing = false
-local resizeStart, startSize
-
-resizeHandle.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-		or input.UserInputType == Enum.UserInputType.Touch then
-		resizing = true
-		resizeStart = input.Position
-		startSize = mainFrame.Size
-	end
-end)
-
-resizeHandle.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-		or input.UserInputType == Enum.UserInputType.Touch then
-		resizing = false
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement
-		or input.UserInputType == Enum.UserInputType.Touch then
-
-		if dragging then
-			local delta = input.Position - dragStart
-			mainFrame.Position = UDim2.new(
-				startPos.X.Scale,
-				startPos.X.Offset + delta.X,
-				startPos.Y.Scale,
-				startPos.Y.Offset + delta.Y
-			)
-		end
-
-		if resizing then
-			local delta = input.Position - resizeStart
-			local newWidth = math.max(startSize.X.Offset + delta.X, MIN_WIDTH)
-			local newHeight = math.max(startSize.Y.Offset + delta.Y, MIN_HEIGHT)
-			mainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
-		end
-	end
-end)
-
---// VALUE TRACKING
-local valuesFolder = workspace:WaitForChild("GameStuff"):WaitForChild("Values")
-
-local function bindAttribute(attr, label)
-	local function update()
-		local val = valuesFolder:GetAttribute(attr)
-		if typeof(val) == "number" then
-			label.Text = tostring(val)
-		else
-			label.Text = "N/A"
-		end
-	end
-
-	valuesFolder:GetAttributeChangedSignal(attr):Connect(update)
-	update()
-end
-
-bindAttribute("RoundTime", roundTimeLabel)
-bindAttribute("IntermissionTime", intermissionLabel)
-bindAttribute("Power", powerLabel)

@@ -1,16 +1,14 @@
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local player = game.Players.LocalPlayer
-
 local lastCombatStamina = 100
 local regenBoost = 0
 
 RunService.RenderStepped:Connect(function(dt)
     local char = player.Character
     if not char then return end
-
     local stats = char:FindFirstChild("Stats")
     if not stats then return end
-
     local stamina = stats:FindFirstChild("Stamina")
     local combatStamina = stats:FindFirstChild("CombatStamina")
     local clash = stats:FindFirstChild("ClashStrength")
@@ -19,7 +17,6 @@ RunService.RenderStepped:Connect(function(dt)
     if stamina then
         stamina.Value = 100
     end
-
     if clash then
         clash.Value = 100
     end
@@ -27,21 +24,16 @@ RunService.RenderStepped:Connect(function(dt)
     -- Combat stamina logic
     if combatStamina then
         local current = combatStamina.Value
-
         -- Detect decrease → boost regen
         if current < lastCombatStamina then
-            regenBoost = 5 -- increase this for faster recovery after usage
+            regenBoost = 5
         end
-
         -- Gradual regen
         if current < 100 then
-            local regenSpeed = 10 + regenBoost -- base + boost
+            local regenSpeed = 10 + regenBoost
             combatStamina.Value = math.clamp(current + regenSpeed * dt, 0, 100)
-
-            -- Slowly decay the boost over time
             regenBoost = math.max(regenBoost - (5 * dt), 0)
         end
-
         lastCombatStamina = combatStamina.Value
     end
 
@@ -50,10 +42,9 @@ RunService.RenderStepped:Connect(function(dt)
     if gui then
         local mech = gui:FindFirstChild("MechanicsFrame")
         if mech then
-            mech.QTEToma.Visible = true
-            mech.QTEToma.ImageButton.PC.Visible = true
+            local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+            mech.QTEToma.Visible = not isMobile
+            mech.QTEToma.ImageButton.PC.Visible = not isMobile
         end
     end
 end)
-
-

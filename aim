@@ -1,0 +1,103 @@
+-- CHAIN AIM PRACTICE
+
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+local holding = false
+local aimEnabled = false  -- toggled by V key
+
+-- SETTINGS
+local SMOOTHNESS = 18
+local PREDICTION_TIME = 0.12
+local ENABLE_PREDICTION = true
+local ENABLE_WALLCHECK = false
+
+-- Find torso every frame (reliable)
+local function getTorso(model)
+    if not model then return nil end
+    for _, name in ipairs({"HumanoidRootPart", "UpperTorso", "Torso"}) do
+        local part = model:FindFirstChild(name)
+        if part and part:IsA("BasePart") then
+            return part
+        end
+    end
+    return nil
+end
+
+local function predict(part, t)
+    if not ENABLE_PREDICTION then
+        return part.Position
+    end
+    local v = part.AssemblyLinearVelocity
+    return part.Position + v * t
+end
+
+local function hasLOS(from, toPart)
+    if not ENABLE_WALLCHECK then return true end
+    if not toPart then return false end
+
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Blacklist
+    params.FilterDescendantsInstances = {LocalPlayer.Character}
+    params.IgnoreWater = true
+
+    local dir = toPart.Position - from
+    local result = workspace:Raycast(from, dir, params)
+
+    if not result then
+        return true
+    end
+
+    return result.Instance:IsDescendantOf(toPart.Parent)
+end
+
+-- Toggle aim lock with V
+UserInputService.InputBegan:Connect(function(i, gp)
+    if gp then return end
+
+    -- V key toggles the system on/off
+    if i.KeyCode == Enum.KeyCode.V then
+        aimEnabled = not aimEnabled
+        print("Aim lock " .. (aimEnabled and "ENABLED" or "DISABLED"))
+    end
+
+    -- Right-click only activates holding if toggle is on
+    if i.UserInputType == Enum.UserInputType.MouseButton2 then
+        if aimEnabled then
+            holding = true
+            print("holding")
+        end
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton2 then
+        holding = false
+    end
+end)
+
+-- Main loop
+RunService.RenderStepped:Connect(function(dt)
+    if not holding then return end
+
+    local chain = workspace.Misc.AI:FindFirstChild("CHAIN")
+    if chain then
+        print("LOCKING")
+
+        local torso = getTorso(chain)
+        if not torso then return end
+
+        local targetPos = predict(torso, PREDICTION_TIME)
+
+        if not hasLOS(Camera.CFrame.Position, torso) then return end
+
+        local current = Camera.CFrame
+        local target = CFrame.new(current.Position, targetPos)
+        local alpha = 1 - math.exp(-SMOOTHNESS * dt)
+        Camera.CFrame = current:Lerp(target, alpha)
+    end
+end)

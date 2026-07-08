@@ -18,7 +18,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "PassiveTracker"
 ScreenGui.IgnoreGuiInset = false
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = game.CoreGui
 ScreenGui.DisplayOrder = 3
 
 -- === TOP BAR FRAME ===
@@ -72,7 +72,7 @@ local DeflectChanceLabel = newLabel("Deflect Chance: —")
 local alertGui = Instance.new("ScreenGui")
 alertGui.Name = "AlertGui"
 alertGui.ResetOnSpawn = false
-alertGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+alertGui.Parent = game.CoreGui
 
 local alertLabel = Instance.new("TextLabel")
 alertLabel.Size = UDim2.new(0.8, 0, 0.3, 0)
@@ -179,7 +179,7 @@ MobileGui.Name = "MobileHighlightBtn"
 MobileGui.ResetOnSpawn = false
 MobileGui.IgnoreGuiInset = false
 MobileGui.DisplayOrder = 4
-MobileGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+MobileGui.Parent = game.CoreGui
 
 local MobileHLButton = Instance.new("TextButton")
 MobileHLButton.Size = UDim2.new(0, 72, 0, 42)

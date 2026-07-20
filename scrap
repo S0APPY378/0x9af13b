@@ -1,0 +1,605 @@
+-- Scrap, Trap & Loot ESP Script (Optimized + Auto-Collect)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local Player = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+-- ESP state
+local ESPEnabled = false
+local BearTrapESPEnabled = false
+local LootESPEnabled = false
+
+local ESPColor = Color3.fromRGB(255, 255, 0)       -- Yellow for Scrap
+local BearTrapColor = Color3.fromRGB(255, 50, 50)  -- Red for Danger
+local LootColor = Color3.fromRGB(0, 200, 255)      -- Cyan for Loot
+
+local TextSize = 8
+local MaxDistance = 1000000000
+local MaxDistanceSq = MaxDistance * MaxDistance
+
+-- Auto-collect state
+local AutoCollectEnabled = false
+local AutoCollectDistance = 20 -- studs, user-configurable
+
+local ESPObjects = {}
+
+-- ─────────────────────────────────────────────
+-- GUI
+-- ─────────────────────────────────────────────
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ScrapESPGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 200, 0, 285)
+MainFrame.Position = UDim2.new(0.5, -100, 0, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 8)
+Corner.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Title.BorderSizePixel = 0
+Title.Text = "Scrap, Trap & Loot ESP"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
+Title.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 8)
+TitleCorner.Parent = Title
+
+-- Scrap ESP toggle
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 160, 0, 30)
+ToggleButton.Position = UDim2.new(0.5, -80, 0, 38)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Text = "Scrap ESP: OFF"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 13
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.Parent = MainFrame
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 6)
+ButtonCorner.Parent = ToggleButton
+
+-- BearTrap ESP toggle
+local TrapToggleButton = Instance.new("TextButton")
+TrapToggleButton.Size = UDim2.new(0, 160, 0, 30)
+TrapToggleButton.Position = UDim2.new(0.5, -80, 0, 75)
+TrapToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+TrapToggleButton.BorderSizePixel = 0
+TrapToggleButton.Text = "Trap ESP: OFF"
+TrapToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TrapToggleButton.TextSize = 13
+TrapToggleButton.Font = Enum.Font.GothamBold
+TrapToggleButton.Parent = MainFrame
+
+local TrapButtonCorner = Instance.new("UICorner")
+TrapButtonCorner.CornerRadius = UDim.new(0, 6)
+TrapButtonCorner.Parent = TrapToggleButton
+
+-- Loot ESP toggle
+local LootToggleButton = Instance.new("TextButton")
+LootToggleButton.Size = UDim2.new(0, 160, 0, 30)
+LootToggleButton.Position = UDim2.new(0.5, -80, 0, 112)
+LootToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+LootToggleButton.BorderSizePixel = 0
+LootToggleButton.Text = "Loot ESP: OFF"
+LootToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LootToggleButton.TextSize = 13
+LootToggleButton.Font = Enum.Font.GothamBold
+LootToggleButton.Parent = MainFrame
+
+local LootButtonCorner = Instance.new("UICorner")
+LootButtonCorner.CornerRadius = UDim.new(0, 6)
+LootButtonCorner.Parent = LootToggleButton
+
+-- Scrap amount label
+local ScrapAmountLabel = Instance.new("TextLabel")
+ScrapAmountLabel.Size = UDim2.new(0, 160, 0, 22)
+ScrapAmountLabel.Position = UDim2.new(0.5, -80, 0, 150)
+ScrapAmountLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+ScrapAmountLabel.BorderSizePixel = 0
+ScrapAmountLabel.Text = "Scrap: 0"
+ScrapAmountLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+ScrapAmountLabel.TextSize = 12
+ScrapAmountLabel.Font = Enum.Font.GothamBold
+ScrapAmountLabel.Parent = MainFrame
+
+local ScrapLabelCorner = Instance.new("UICorner")
+ScrapLabelCorner.CornerRadius = UDim.new(0, 6)
+ScrapLabelCorner.Parent = ScrapAmountLabel
+
+-- Auto-collect toggle
+local AutoButton = Instance.new("TextButton")
+AutoButton.Size = UDim2.new(0, 160, 0, 30)
+AutoButton.Position = UDim2.new(0.5, -80, 0, 180)
+AutoButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+AutoButton.BorderSizePixel = 0
+AutoButton.Text = "Auto-Collect: OFF"
+AutoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoButton.TextSize = 12
+AutoButton.Font = Enum.Font.GothamBold
+AutoButton.Parent = MainFrame
+
+local AutoButtonCorner = Instance.new("UICorner")
+AutoButtonCorner.CornerRadius = UDim.new(0, 6)
+AutoButtonCorner.Parent = AutoButton
+
+-- Distance row: label + text box
+local DistLabel = Instance.new("TextLabel")
+DistLabel.Size = UDim2.new(0, 76, 0, 22)
+DistLabel.Position = UDim2.new(0.5, -80, 0, 220)
+DistLabel.BackgroundTransparency = 1
+DistLabel.Text = "Dist (studs):"
+DistLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+DistLabel.TextSize = 11
+DistLabel.Font = Enum.Font.Gotham
+DistLabel.TextXAlignment = Enum.TextXAlignment.Left
+DistLabel.Parent = MainFrame
+
+local DistBox = Instance.new("TextBox")
+DistBox.Size = UDim2.new(0, 60, 0, 22)
+DistBox.Position = UDim2.new(0.5, 4, 0, 220)
+DistBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+DistBox.BorderSizePixel = 0
+DistBox.Text = "20"
+DistBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+DistBox.TextSize = 12
+DistBox.Font = Enum.Font.Gotham
+DistBox.ClearTextOnFocus = false
+DistBox.Parent = MainFrame
+
+local DistBoxCorner = Instance.new("UICorner")
+DistBoxCorner.CornerRadius = UDim.new(0, 4)
+DistBoxCorner.Parent = DistBox
+
+-- ─────────────────────────────────────────────
+-- Distance box input handling
+-- ─────────────────────────────────────────────
+
+DistBox.FocusLost:Connect(function()
+    local v = tonumber(DistBox.Text)
+    if v and v > 0 then
+        AutoCollectDistance = v
+    else
+        DistBox.Text = tostring(AutoCollectDistance)
+    end
+end)
+
+-- ─────────────────────────────────────────────
+-- ESP object helpers
+-- ─────────────────────────────────────────────
+
+local function CreateESP(targetObject, objType)
+    if ESPObjects[targetObject] then return end
+
+    local Billboard = Instance.new("BillboardGui")
+    Billboard.Name = objType .. "ESP"
+    Billboard.AlwaysOnTop = true
+    Billboard.Size = UDim2.new(0, 200, 0, 50)
+    Billboard.StudsOffset = Vector3.new(0, 2, 0)
+    Billboard.Adornee = targetObject
+    Billboard.Parent = targetObject
+
+    local TextLabel = Instance.new("TextLabel")
+    TextLabel.Size = UDim2.new(1, 0, 1, 0)
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.TextSize = TextSize
+    TextLabel.Font = Enum.Font.GothamBold
+    TextLabel.TextStrokeTransparency = 0.5
+    TextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    
+    if objType == "BearTrap" then
+        TextLabel.TextColor3 = BearTrapColor
+        TextLabel.Text = "BEAR TRAP"
+    elseif objType == "Loot" then
+        TextLabel.TextColor3 = LootColor
+        TextLabel.Text = string.upper(targetObject.Name)
+    else
+        TextLabel.TextColor3 = ESPColor
+        TextLabel.Text = "SCRAP"
+    end
+    
+    TextLabel.Parent = Billboard
+
+    ESPObjects[targetObject] = {
+        Billboard = Billboard,
+        TextLabel = TextLabel,
+        Type = objType
+    }
+end
+
+local function RemoveESP(targetObject)
+    local esp = ESPObjects[targetObject]
+    if esp then
+        esp.Billboard:Destroy()
+        ESPObjects[targetObject] = nil
+    end
+end
+
+local function ClearESPByType(objType)
+    for obj, esp in pairs(ESPObjects) do
+        if esp.Type == objType then
+            esp.Billboard:Destroy()
+            ESPObjects[obj] = nil
+        end
+    end
+end
+
+-- ─────────────────────────────────────────────
+-- Folder caching & scanning
+-- ─────────────────────────────────────────────
+
+local ScrapFolder = nil
+local BearTrapFolder = nil
+local LootablesFolder = nil
+
+local function GetScrapFolder()
+    if ScrapFolder and ScrapFolder.Parent then return ScrapFolder end
+    local ok, result = pcall(function()
+        local Misc = Workspace:FindFirstChild("Misc")
+        if not Misc then return nil end
+        local Zones = Misc:FindFirstChild("Zones")
+        if not Zones then return nil end
+        local LootingItems = Zones:FindFirstChild("LootingItems")
+        if not LootingItems then return nil end
+        return LootingItems:FindFirstChild("Scrap")
+    end)
+    ScrapFolder = ok and result or nil
+    return ScrapFolder
+end
+
+local function GetBearTrapFolder()
+    if BearTrapFolder and BearTrapFolder.Parent then return BearTrapFolder end
+    local ok, result = pcall(function()
+        local GameStuff = Workspace:FindFirstChild("GameStuff")
+        if not GameStuff then return nil end
+        local PlayerStuff = GameStuff:FindFirstChild("PlayerStuff")
+        if not PlayerStuff then return nil end
+        return PlayerStuff:FindFirstChild("BearTraps")
+    end)
+    BearTrapFolder = ok and result or nil
+    return BearTrapFolder
+end
+
+local function GetLootablesFolder()
+    if LootablesFolder and LootablesFolder.Parent then return LootablesFolder end
+    local ok, result = pcall(function()
+        local Misc = Workspace:FindFirstChild("Misc")
+        if not Misc then return nil end
+        return Misc:FindFirstChild("Lootables")
+    end)
+    LootablesFolder = ok and result or nil
+    return LootablesFolder
+end
+
+local function ScanForScrap()
+    local folder = GetScrapFolder()
+    if not folder then return end
+    for _, v in ipairs(folder:GetChildren()) do
+        if v:GetAttribute("Scrap") or v:IsA("Model") or v:IsA("Part") then
+            CreateESP(v, "Scrap")
+        end
+    end
+end
+
+local function ScanForBearTraps()
+    local folder = GetBearTrapFolder()
+    if not folder then return end
+    for _, v in ipairs(folder:GetChildren()) do
+        if v:IsA("Model") and v.Name == "BearTrap" then
+            CreateESP(v, "BearTrap")
+        end
+    end
+end
+
+local function ScanForLoot()
+    local folder = GetLootablesFolder()
+    if not folder then return end
+    
+    for _, container in ipairs(folder:GetChildren()) do
+        local itemsFolder = container:FindFirstChild("Items")
+        if itemsFolder then
+            for _, item in ipairs(itemsFolder:GetChildren()) do
+                CreateESP(item, "Loot")
+            end
+        end
+    end
+end
+
+-- ─────────────────────────────────────────────
+-- Combined RenderStepped tick
+-- ─────────────────────────────────────────────
+
+local lastESPUpdate = 0
+local UPDATE_INTERVAL = 0.2
+local lastAutoCollect = 0
+local AUTO_COLLECT_INTERVAL = 0.15
+
+RunService.Heartbeat:Connect(function()
+    local character = Player.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local hrpPos = hrp.Position
+
+    local now = tick()
+    local doFullUpdate = (now - lastESPUpdate) >= UPDATE_INTERVAL
+    local doAutoCollect = AutoCollectEnabled and (now - lastAutoCollect) >= AUTO_COLLECT_INTERVAL
+
+    local distSqLimit = AutoCollectDistance * AutoCollectDistance
+    local bestObj, bestDistSq = nil, distSqLimit
+
+    for targetObject, espData in pairs(ESPObjects) do
+        -- Clear ESP if object is destroyed or moved out of workspace
+        if not (targetObject and targetObject.Parent) then
+            RemoveESP(targetObject)
+            continue
+        end
+
+        local position = targetObject:IsA("Model")
+            and targetObject:GetPivot().Position
+            or targetObject.Position
+
+        local dx = hrpPos.X - position.X
+        local dy = hrpPos.Y - position.Y
+        local dz = hrpPos.Z - position.Z
+        local distSq = dx*dx + dy*dy + dz*dz
+
+        -- ESP Logic
+        local isTargetESPEnabled = 
+            (espData.Type == "Scrap" and ESPEnabled) or 
+            (espData.Type == "BearTrap" and BearTrapESPEnabled) or
+            (espData.Type == "Loot" and LootESPEnabled)
+        
+        if isTargetESPEnabled then
+            if distSq <= MaxDistanceSq then
+                espData.Billboard.Enabled = true
+                if doFullUpdate then
+                    local dist = math.sqrt(distSq)
+
+                    if espData.Type == "Scrap" then
+                        local isAvailable = false
+                        if targetObject:IsA("Model") then
+                            local valuesFolder = targetObject:FindFirstChild("Values")
+                            if valuesFolder then
+                                isAvailable = valuesFolder:GetAttribute("Available") == true
+                            end
+                        end
+
+                        espData.TextLabel.TextColor3 = isAvailable
+                            and Color3.fromRGB(0, 255, 0)
+                            or ESPColor
+
+                        espData.TextLabel.Text = "SCRAP\n"
+                            .. math.round(position.X) .. ", "
+                            .. math.round(position.Y) .. ", "
+                            .. math.round(position.Z)
+                            .. "\n" .. math.round(dist) .. " studs"
+                            
+                    elseif espData.Type == "BearTrap" then
+                        espData.TextLabel.TextColor3 = BearTrapColor
+                        espData.TextLabel.Text = "BEAR TRAP\n" .. math.round(dist) .. " studs"
+                        
+                    elseif espData.Type == "Loot" then
+                        espData.TextLabel.TextColor3 = LootColor
+                        espData.TextLabel.Text = string.upper(targetObject.Name) .. "\n" .. math.round(dist) .. " studs"
+                    end
+                end
+            else
+                espData.Billboard.Enabled = false
+            end
+        else
+            espData.Billboard.Enabled = false
+        end
+
+        -- Auto-collect (Target Scrap and Loot, NEVER BearTraps)
+        if doAutoCollect and (espData.Type == "Scrap" or espData.Type == "Loot") then
+            local available = true
+            
+            -- Only check Available attributes for scrap
+            if espData.Type == "Scrap" then
+                if targetObject:IsA("Model") then
+                    local vals = targetObject:FindFirstChild("Values")
+                    available = vals and vals:GetAttribute("Available") == true
+                else
+                    available = targetObject:GetAttribute("Available") == true
+                end
+            end
+
+            if available and distSq < bestDistSq then
+                bestDistSq = distSq
+                bestObj = targetObject
+            end
+        end
+    end
+
+    if doFullUpdate then lastESPUpdate = now end
+
+    if doAutoCollect then
+        lastAutoCollect = now
+        if bestObj then
+            local prompt = bestObj:IsA("Model")
+                and bestObj:FindFirstChildWhichIsA("ProximityPrompt", true)
+                or bestObj:FindFirstChildWhichIsA("ProximityPrompt")
+            if prompt then
+                fireproximityprompt(prompt)
+            end
+        end
+    end
+end)
+
+-- ─────────────────────────────────────────────
+-- Scrap inventory tracking
+-- ─────────────────────────────────────────────
+
+local function SetupScrapTracking()
+    local function refreshLabel()
+        local character = Player.Character
+        if not character then ScrapAmountLabel.Text = "Scrap: N/A" return end
+        local items = character:FindFirstChild("Items")
+        local amount = items and items:GetAttribute("Scrap") or 0
+        ScrapAmountLabel.Text = "Scrap: " .. tostring(amount)
+    end
+
+    local function hookCharacter(character)
+        refreshLabel()
+        local items = character:WaitForChild("Items", 5)
+        if items then
+            items:GetAttributeChangedSignal("Scrap"):Connect(refreshLabel)
+        end
+    end
+
+    if Player.Character then hookCharacter(Player.Character) end
+    Player.CharacterAdded:Connect(hookCharacter)
+end
+
+SetupScrapTracking()
+
+-- ─────────────────────────────────────────────
+-- Folder monitoring (ChildAdded / DescendantAdded)
+-- ─────────────────────────────────────────────
+
+local scrapMonitorStarted = false
+local trapMonitorStarted = false
+local lootMonitorStarted = false
+
+local function MonitorScrap()
+    if scrapMonitorStarted then return end
+    local folder = GetScrapFolder()
+    if not folder then
+        task.delay(1, MonitorScrap)
+        return
+    end
+    scrapMonitorStarted = true
+
+    folder.ChildAdded:Connect(function(child)
+        if not ESPEnabled then return end
+        task.wait(0.1)
+        if child.Parent and (child:GetAttribute("Scrap") or child:IsA("Model") or child:IsA("Part")) then
+            CreateESP(child, "Scrap")
+        end
+    end)
+end
+
+local function MonitorBearTraps()
+    if trapMonitorStarted then return end
+    local folder = GetBearTrapFolder()
+    if not folder then
+        task.delay(1, MonitorBearTraps)
+        return
+    end
+    trapMonitorStarted = true
+
+    folder.ChildAdded:Connect(function(child)
+        if not BearTrapESPEnabled then return end
+        task.wait(0.1)
+        if child.Parent and child:IsA("Model") and child.Name == "BearTrap" then
+            CreateESP(child, "BearTrap")
+        end
+    end)
+end
+
+local function MonitorLoot()
+    if lootMonitorStarted then return end
+    local folder = GetLootablesFolder()
+    if not folder then
+        task.delay(1, MonitorLoot)
+        return
+    end
+    lootMonitorStarted = true
+
+    -- Use DescendantAdded because items spawn deep inside container "Items" folders
+    folder.DescendantAdded:Connect(function(descendant)
+        if not LootESPEnabled then return end
+        task.wait(0.1)
+        if descendant.Parent and descendant.Parent.Name == "Items" then
+            CreateESP(descendant, "Loot")
+        end
+    end)
+end
+
+-- ─────────────────────────────────────────────
+-- Button handlers
+-- ─────────────────────────────────────────────
+
+local function ToggleESP()
+    ESPEnabled = not ESPEnabled
+    if ESPEnabled then
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        ToggleButton.Text = "Scrap ESP: ON"
+        ScanForScrap()
+        MonitorScrap()
+    else
+        ToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        ToggleButton.Text = "Scrap ESP: OFF"
+        ClearESPByType("Scrap")
+    end
+end
+
+local function ToggleTrapESP()
+    BearTrapESPEnabled = not BearTrapESPEnabled
+    if BearTrapESPEnabled then
+        TrapToggleButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        TrapToggleButton.Text = "Trap ESP: ON"
+        ScanForBearTraps()
+        MonitorBearTraps()
+    else
+        TrapToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        TrapToggleButton.Text = "Trap ESP: OFF"
+        ClearESPByType("BearTrap")
+    end
+end
+
+local function ToggleLootESP()
+    LootESPEnabled = not LootESPEnabled
+    if LootESPEnabled then
+        LootToggleButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        LootToggleButton.Text = "Loot ESP: ON"
+        ScanForLoot()
+        MonitorLoot()
+    else
+        LootToggleButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        LootToggleButton.Text = "Loot ESP: OFF"
+        ClearESPByType("Loot")
+    end
+end
+
+local function ToggleAutoCollect()
+    AutoCollectEnabled = not AutoCollectEnabled
+    if AutoCollectEnabled then
+        AutoButton.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
+        AutoButton.Text = "Auto-Collect: ON"
+        
+        if not ESPEnabled then ScanForScrap() MonitorScrap() end
+        if not LootESPEnabled then ScanForLoot() MonitorLoot() end
+    else
+        AutoButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        AutoButton.Text = "Auto-Collect: OFF"
+    end
+end
+
+ToggleButton.MouseButton1Click:Connect(ToggleESP)
+TrapToggleButton.MouseButton1Click:Connect(ToggleTrapESP)
+LootToggleButton.MouseButton1Click:Connect(ToggleLootESP)
+AutoButton.MouseButton1Click:Connect(ToggleAutoCollect)
+
+print("Scrap, Trap & Loot ESP + Auto-Collect loaded!")

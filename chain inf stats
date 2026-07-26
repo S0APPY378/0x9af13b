@@ -8,10 +8,10 @@ local isMobile = UserInputService.TouchEnabled and not UserInputService.Keyboard
 
 -- Hide once for mobile
 if isMobile then
-    local gui = player.PlayerGui:WaitForChild("Ingame")
-    local mech = gui:WaitForChild("MechanicsFrame")
-    mech.QTEToma.Visible = false
-    mech.QTEToma.ImageButton.PC.Visible = false
+   --local gui = player.PlayerGui:WaitForChild("Ingame")
+   --local mech = gui:WaitForChild("MechanicsFrame")
+   --mech.QTEToma.Visible = false
+   --mech.QTEToma.ImageButton.PC.Visible = false
 end
 
 RunService.RenderStepped:Connect(function(dt)
@@ -49,8 +49,8 @@ RunService.RenderStepped:Connect(function(dt)
         if gui then
             local mech = gui:FindFirstChild("MechanicsFrame")
             if mech then
-                mech.QTEToma.Visible = true
-                mech.QTEToma.ImageButton.PC.Visible = true
+               --mech.QTEToma.Visible = true
+                --mech.QTEToma.ImageButton.PC.Visible = true
             end
         end
     end

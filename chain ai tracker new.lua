@@ -373,7 +373,7 @@ RunService.RenderStepped:Connect(function()
 		EnragedLabel.TextColor3 = getColor(enraged)
 		DeflectChanceLabel.Text = "Deflect Chance: " .. format(deflectChance) .. "%"
         DeflectChanceLabel.TextColor3 = getColor(deflectChance)
-		AngerRequiredLabel.Text = "Deflect Chance: " .. format(deflectChance) .. "%"
+		AngerRequiredLabel.Text = "Anger Required: " .. format(deflectChance) .. "%"
         AngerRequiredLabel.TextColor3 = getColor(deflectChance)
 
 	else

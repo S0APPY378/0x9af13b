@@ -386,7 +386,7 @@ end
 		EnragedLabel.TextColor3 = getColor(enraged)
 		DeflectChanceLabel.Text = "Deflect Chance: " .. format(deflectChance) .. "%"
         DeflectChanceLabel.TextColor3 = getColor(deflectChance)
-		AngerRequiredLabel.Text = "Anger Required: " .. format(deflectChance) .. "%"
+		AngerRequiredLabel.Text = "Anger Required: " .. format(angerrequired) .. ""
         AngerRequiredLabel.TextColor3 = getColor(deflectChance)
 			QTEImmunityLabel.Text = "QTE Immunity: " .. (qteImmunity and "TRUE" or "FALSE")
 			

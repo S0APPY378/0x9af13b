@@ -66,7 +66,6 @@ local AngerLabel    = newLabel("Anger: —")
 local ChokeLabel    = newLabel("Choke: —")
 local BurstLabel    = newLabel("Burst: —")
 local EnragedLabel  = newLabel("Enraged Meter: —")
-local DeflectChanceLabel = newLabel("Deflect Chance: —")
 local AngerRequiredLabel = newLabel("AngerRequired: —")
 		local QTEImmunityLabel = newLabel("QTE Immunity: —")
 
@@ -325,7 +324,6 @@ RunService.RenderStepped:Connect(function()
 		local choke   = att.ChokeMeter or 0
 		local burst   = att.Burst or 0
 		local enraged = att.EnragedMeter or 0
-		local deflectChance  = att.DeflectChance or 0
 		local angerrequired  = att.RequirementForAnger or 0
 		local qteImmunity = att.QTEImmunity or false
 		local charging = att.Charging or false
@@ -384,8 +382,6 @@ end
 		BurstLabel.TextColor3   = getColor(burst)
 		EnragedLabel.Text   = "Enraged Meter: " .. format(enraged) .. "%"
 		EnragedLabel.TextColor3 = getColor(enraged)
-		DeflectChanceLabel.Text = "Deflect Chance: " .. format(deflectChance) .. "%"
-        DeflectChanceLabel.TextColor3 = getColor(deflectChance)
 		AngerRequiredLabel.Text = "Anger Required: " .. format(angerrequired) .. ""
         AngerRequiredLabel.TextColor3 = getColor(angerrequired)
 			QTEImmunityLabel.Text = "QTE Immunity: " .. (qteImmunity and "TRUE" or "FALSE")
@@ -404,7 +400,6 @@ end
 		ChokeLabel.Text    = "Choke: —"
 		BurstLabel.Text    = "Burst: —"
 		EnragedLabel.Text  = "Enraged Meter: —"
-		DeflectChanceLabel.Text = "Deflect Chance: —"
 		AngerRequiredLabel.Text = "AngerRequired: —"
 			QTEImmunityLabel.Text = "QTE Immunity: —"
 QTEImmunityLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -413,7 +408,6 @@ QTEImmunityLabel.TextColor3 = Color3.new(1, 1, 1)
 		ChokeLabel.TextColor3   = Color3.new(1, 1, 1)
 		BurstLabel.TextColor3   = Color3.new(1, 1, 1)
 		EnragedLabel.TextColor3 = Color3.new(1, 1, 1)
-	    DeflectChanceLabel.TextColor3 = Color3.new(1, 1, 1)
 		AngerRequiredLabel.TextColor3 = Color3.new(1, 1, 1)
 	end
 end)

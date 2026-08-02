@@ -386,7 +386,7 @@ RunService.RenderStepped:Connect(function()
 					end
 				end)
 			end
-		end
+		
 else
 	chargingWarningPlaying = false
 end

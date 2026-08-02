@@ -1,0 +1,81 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local chain = workspace:WaitForChild("Misc"):WaitForChild("AI"):WaitForChild("CHAIN")
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "ChainIndicator"
+gui.ResetOnSpawn = false
+gui.Parent = game.CoreGui
+
+local arrow = Instance.new("TextLabel")
+arrow.Size = UDim2.fromOffset(54, 54)
+arrow.AnchorPoint = Vector2.new(0.5, 0.5)
+arrow.BackgroundTransparency = 1
+arrow.Text = "▲"
+arrow.Font = Enum.Font.GothamBold
+arrow.TextScaled = true
+arrow.TextColor3 = Color3.fromRGB(255, 60, 60)
+arrow.Parent = gui
+
+local EDGE_PADDING = 50
+
+RunService.RenderStepped:Connect(function()
+
+	if not chain or not chain.Parent then
+		arrow.Visible = false
+		return
+	end
+
+	local root = chain:FindFirstChild("HumanoidRootPart") or chain.PrimaryPart
+	if not root then
+		arrow.Visible = false
+		return
+	end
+
+	local camCF = camera.CFrame
+	local toTarget = (root.Position - camCF.Position).Unit
+
+	local forward = camCF.LookVector
+	local right = camCF.RightVector
+	local up = camCF.UpVector
+
+	-- Camera-space coordinates
+	local x = toTarget:Dot(right)
+	local y = toTarget:Dot(up)
+	local z = toTarget:Dot(forward)
+
+	-- If the NPC is visible in front of the camera, hide the indicator
+	local viewportPos, onScreen = camera:WorldToViewportPoint(root.Position)
+	if onScreen and viewportPos.Z > 0 then
+		arrow.Visible = false
+		return
+	end
+
+	arrow.Visible = true
+
+	local dir = Vector2.new(x, -y)
+	if dir.Magnitude < 0.001 then
+		dir = Vector2.new(0, -1)
+	else
+		dir = dir.Unit
+	end
+
+	local screen = camera.ViewportSize
+	local center = screen / 2
+	--local radius = math.min(screen.X, screen.Y) / 2 - EDGE_PADDING
+	local radius = math.min(screen.X, screen.Y) * 0.3
+
+	local pos = center + dir * radius
+
+	arrow.Position = UDim2.fromOffset(
+		math.clamp(pos.X, EDGE_PADDING, screen.X - EDGE_PADDING),
+		math.clamp(pos.Y, EDGE_PADDING, screen.Y - EDGE_PADDING)
+	)
+
+	arrow.Rotation = math.deg(math.atan2(dir.Y, dir.X)) + 90
+end)

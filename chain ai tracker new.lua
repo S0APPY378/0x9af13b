@@ -66,6 +66,7 @@ local ChokeLabel    = newLabel("Choke: —")
 local BurstLabel    = newLabel("Burst: —")
 local EnragedLabel  = newLabel("Enraged Meter: —")
 local DeflectChanceLabel = newLabel("Deflect Chance: —")
+local AngerRequiredLabel = newLabel("AngerRequired: —")
 
 
 -- === ALERT GUI ===
@@ -323,6 +324,7 @@ RunService.RenderStepped:Connect(function()
 		local burst   = att.Burst or 0
 		local enraged = att.EnragedMeter or 0
 		local deflectChance  = att.DeflectChance or 0
+		local angerrequired  = att.RequirementForAnger or 0
 
 		local hrp = ai:FindFirstChild("HumanoidRootPart")
 		if hrp then
@@ -371,6 +373,8 @@ RunService.RenderStepped:Connect(function()
 		EnragedLabel.TextColor3 = getColor(enraged)
 		DeflectChanceLabel.Text = "Deflect Chance: " .. format(deflectChance) .. "%"
         DeflectChanceLabel.TextColor3 = getColor(deflectChance)
+		AngerRequiredLabel.Text = "Deflect Chance: " .. format(deflectChance) .. "%"
+        AngerRequiredLabel.TextColor3 = getColor(deflectChance)
 
 	else
 		NameLabel.Text     = "AI: —"
@@ -380,12 +384,14 @@ RunService.RenderStepped:Connect(function()
 		BurstLabel.Text    = "Burst: —"
 		EnragedLabel.Text  = "Enraged Meter: —"
 		DeflectChanceLabel.Text = "Deflect Chance: —"
+		AngerRequiredLabel.Text = "AngerRequired: —"
 
 		AngerLabel.TextColor3   = Color3.new(1, 1, 1)
 		ChokeLabel.TextColor3   = Color3.new(1, 1, 1)
 		BurstLabel.TextColor3   = Color3.new(1, 1, 1)
 		EnragedLabel.TextColor3 = Color3.new(1, 1, 1)
 	    DeflectChanceLabel.TextColor3 = Color3.new(1, 1, 1)
+		AngerRequiredLabel.TextColor3 = Color3.new(1, 1, 1)
 	end
 end)
 

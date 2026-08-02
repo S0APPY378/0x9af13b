@@ -8,6 +8,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local chokePlaying = false
+local chargingWarningPlaying = false
 local burstWarningPlaying = false
 local highlightEnabled = false
 local activeHighlight = nil
@@ -67,6 +68,7 @@ local BurstLabel    = newLabel("Burst: —")
 local EnragedLabel  = newLabel("Enraged Meter: —")
 local DeflectChanceLabel = newLabel("Deflect Chance: —")
 local AngerRequiredLabel = newLabel("AngerRequired: —")
+local qteImmunity = att.QTEImmunity or false
 
 
 -- === ALERT GUI ===
@@ -325,6 +327,8 @@ RunService.RenderStepped:Connect(function()
 		local enraged = att.EnragedMeter or 0
 		local deflectChance  = att.DeflectChance or 0
 		local angerrequired  = att.RequirementForAnger or 0
+		local QTEImmunityLabel = newLabel("QTE Immunity: —")
+		local charging = att.Charging or false
 
 		local hrp = ai:FindFirstChild("HumanoidRootPart")
 		if hrp then
@@ -361,6 +365,15 @@ RunService.RenderStepped:Connect(function()
 			end
 		end
 
+			if charging then
+	if not chargingWarningPlaying then
+		chargingWarningPlaying = true
+		showAlert("⚠ CHARGE ATTACK ⚠", Color3.fromRGB(255, 80, 0))
+	end
+else
+	chargingWarningPlaying = false
+end
+
 		NameLabel.Text      = "AI: " .. ai.Name
 		DistanceLabel.Text  = "Distance: " .. format(dist)
 		AngerLabel.Text     = "Anger: " .. format(anger) .. "%"
@@ -375,6 +388,13 @@ RunService.RenderStepped:Connect(function()
         DeflectChanceLabel.TextColor3 = getColor(deflectChance)
 		AngerRequiredLabel.Text = "Anger Required: " .. format(deflectChance) .. "%"
         AngerRequiredLabel.TextColor3 = getColor(deflectChance)
+			QTEImmunityLabel.Text = "QTE Immunity: " .. (qteImmunity and "TRUE" or "FALSE")
+
+if qteImmunity then
+    QTEImmunityLabel.TextColor3 = Color3.fromRGB(255, 80, 80) -- red
+else
+    QTEImmunityLabel.TextColor3 = Color3.fromRGB(120, 255, 120) -- green
+end
 
 	else
 		NameLabel.Text     = "AI: —"
@@ -385,6 +405,8 @@ RunService.RenderStepped:Connect(function()
 		EnragedLabel.Text  = "Enraged Meter: —"
 		DeflectChanceLabel.Text = "Deflect Chance: —"
 		AngerRequiredLabel.Text = "AngerRequired: —"
+			QTEImmunityLabel.Text = "QTE Immunity: —"
+QTEImmunityLabel.TextColor3 = Color3.new(1, 1, 1)
 
 		AngerLabel.TextColor3   = Color3.new(1, 1, 1)
 		ChokeLabel.TextColor3   = Color3.new(1, 1, 1)

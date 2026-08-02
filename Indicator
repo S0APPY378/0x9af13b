@@ -68,7 +68,7 @@ RunService.RenderStepped:Connect(function()
 	local screen = camera.ViewportSize
 	local center = screen / 2
 	--local radius = math.min(screen.X, screen.Y) / 2 - EDGE_PADDING
-	local radius = math.min(screen.X, screen.Y) * 0.3
+	local radius = math.min(screen.X, screen.Y) * 0.15
 
 	local pos = center + dir * radius
 

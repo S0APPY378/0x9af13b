@@ -363,11 +363,30 @@ RunService.RenderStepped:Connect(function()
 			end
 		end
 
-			if charging then
-	if not chargingWarningPlaying then
-		chargingWarningPlaying = true
-		showAlert("⚠ CHARGE ATTACK ⚠", Color3.fromRGB(255, 80, 0))
-	end
+
+
+						if hrp then
+			if not hrp:FindFirstChild("ChargeListener") then
+				local tag = Instance.new("BoolValue")
+				tag.Name = "ChargeListener"
+				tag.Parent = hrp
+
+				hrp.ChildAdded:Connect(function(child)
+					if child:IsA("Sound") and child.Name == "Charging" then
+						if not chargingWarningPlaying then
+							chargingWarningPlaying = true
+							showAlert("⚠ CHARGE ATTACK ⚠", Color3.fromRGB(255, 80, 0))
+						end
+
+						child.AncestryChanged:Connect(function(_, parent)
+							if not parent then
+								chargingWarningPlaying = false
+							end
+						end)
+					end
+				end)
+			end
+		end
 else
 	chargingWarningPlaying = false
 end

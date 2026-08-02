@@ -68,7 +68,7 @@ local BurstLabel    = newLabel("Burst: —")
 local EnragedLabel  = newLabel("Enraged Meter: —")
 local DeflectChanceLabel = newLabel("Deflect Chance: —")
 local AngerRequiredLabel = newLabel("AngerRequired: —")
-local qteImmunity = att.QTEImmunity or false
+		local QTEImmunityLabel = newLabel("QTE Immunity: —")
 
 
 -- === ALERT GUI ===
@@ -327,7 +327,7 @@ RunService.RenderStepped:Connect(function()
 		local enraged = att.EnragedMeter or 0
 		local deflectChance  = att.DeflectChance or 0
 		local angerrequired  = att.RequirementForAnger or 0
-		local QTEImmunityLabel = newLabel("QTE Immunity: —")
+		local qteImmunity = att.QTEImmunity or false
 		local charging = att.Charging or false
 
 		local hrp = ai:FindFirstChild("HumanoidRootPart")
@@ -389,6 +389,7 @@ end
 		AngerRequiredLabel.Text = "Anger Required: " .. format(deflectChance) .. "%"
         AngerRequiredLabel.TextColor3 = getColor(deflectChance)
 			QTEImmunityLabel.Text = "QTE Immunity: " .. (qteImmunity and "TRUE" or "FALSE")
+			
 
 if qteImmunity then
     QTEImmunityLabel.TextColor3 = Color3.fromRGB(255, 80, 80) -- red
